@@ -104,7 +104,7 @@ public class PostService {
     return ResponseDto.success(postRepository.findAllByOrderByModifiedAtDesc());
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   public ResponseDto<?> getUserPosts(UserDetailsImpl userDetails) {
 
     // Post 테이블에 유저 아이디로 작성한 게시글 가져오기.
