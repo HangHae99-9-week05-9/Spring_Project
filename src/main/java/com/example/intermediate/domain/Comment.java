@@ -26,7 +26,7 @@ public class Comment extends Timestamped {
 
   @JoinColumn(name = "member_id", nullable = false)
   @ManyToOne(fetch = FetchType.LAZY)
-  private Member author;
+  private Member member;
 
   @JoinColumn(name = "post_id", nullable = false)
   @ManyToOne(fetch = FetchType.LAZY)
@@ -67,7 +67,7 @@ public class Comment extends Timestamped {
   // 댓글 삭제
   public void remove() {this.isRemoved = true;}
   public boolean validateMember(Member member) {
-    return !this.author.equals(member);
+    return !this.member.equals(member);
   }
 
   public List<Comment> findRemovableList() {
