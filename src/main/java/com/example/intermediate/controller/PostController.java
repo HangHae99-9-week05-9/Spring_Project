@@ -54,4 +54,18 @@ public class PostController {
     return postService.deletePost(id, request);
   }
 
+
+  @ApiImplicitParams({
+          @ApiImplicitParam(
+                  name = "Refresh-Token",
+                  required = true,
+                  dataType = "string",
+                  paramType = "header"
+          )
+  })
+  @PostMapping(value = "api/posts/{postid}/likes")
+  public ResponseDto<?> postLikes(@PathVariable Long postid, HttpServletRequest request) {
+    return postService.postLikes(postid, request);
+  }
+
 }

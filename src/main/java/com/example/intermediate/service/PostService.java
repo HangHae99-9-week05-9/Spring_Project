@@ -3,12 +3,14 @@ package com.example.intermediate.service;
 import com.example.intermediate.controller.response.CommentResponseDto;
 import com.example.intermediate.controller.response.PostResponseDto;
 import com.example.intermediate.domain.Comment;
+import com.example.intermediate.domain.Likes;
 import com.example.intermediate.domain.Member;
 import com.example.intermediate.domain.Post;
 import com.example.intermediate.controller.request.PostRequestDto;
 import com.example.intermediate.controller.response.ResponseDto;
 import com.example.intermediate.jwt.TokenProvider;
 import com.example.intermediate.repository.CommentRepository;
+import com.example.intermediate.repository.LikesRepository;
 import com.example.intermediate.repository.PostRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +26,7 @@ public class PostService {
 
   private final PostRepository postRepository;
   private final CommentRepository commentRepository;
+  private final LikesRepository likesRepository;
 
   private final TokenProvider tokenProvider;
 
@@ -174,6 +177,27 @@ public class PostService {
       return null;
     }
     return tokenProvider.getMemberFromAuthentication();
+  }
+
+  @Transactional
+  public ResponseDto<?> postLikes(long postId, HttpServletRequest request) {
+
+    Post post = postRepository.findById(postId).orElseThrow(() -> {
+      throw new RuntimeException("게시글이 존재하지 않습니다.");
+    });
+
+    Member member = validateMember(request);
+    if(likesRepository.findLikesByMemberAndPost(member, post).isPresent()){
+      return ResponseDto.fail("ALREADY_EXIST", "이미 좋아요를 하셨습니다.");
+    }
+    Likes likes = new Likes();
+
+
+    likes.setPost(post);
+    likes.setMember(member);
+    likesRepository.save(likes);
+
+    return ResponseDto.success("success");
   }
 
 }
