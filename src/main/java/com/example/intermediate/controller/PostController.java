@@ -51,7 +51,7 @@ public class PostController {
     return postService.updatePost(id, postRequestDto, request);
   }
 
-  // 작성한 글 조회
+  // 멤버가 작성한 글 조회
   @GetMapping(value = "/api/auth/posts")
   public ResponseDto<?> UserPosts(@AuthenticationPrincipal UserDetailsImpl userDetails) {
     return postService.getUserPosts(userDetails);
