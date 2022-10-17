@@ -43,4 +43,9 @@ public class Comment extends Timestamped {
   public boolean validateMember(Member member) {
     return !this.member.equals(member);
   }
+
+
 }
+
+
+// 연결이 됐나?????
