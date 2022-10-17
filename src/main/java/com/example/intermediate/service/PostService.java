@@ -64,7 +64,7 @@ public class PostService {
     postRepository.save(post);
     return ResponseDto.success(
         PostResponseDto.builder()
-            .postId(post.getId())
+            .id(post.getId())
             .title(post.getTitle())
             .content(post.getContent())
             .author(post.getMember().getNickname())
@@ -113,7 +113,7 @@ public class PostService {
     }
     return ResponseDto.success(
             PostResponseDto.builder()
-                    .postId(post.getId())
+                    .id(post.getId())
                     .title(post.getTitle())
                     .content(post.getContent())
                     .commentResponseDtoList(commentResponseDtoList)
@@ -130,12 +130,8 @@ public class PostService {
     List<Post> postList = postRepository.findAllByOrderByModifiedAtDesc();
     List<PostResponseDto> postResponseDtoList = new ArrayList<>();
     for (Post post : postList) {
-      List<Comment> commentList = commentRepository.findAllByPost(post);
-      List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
-
-
       postResponseDtoList.add(PostResponseDto.builder()
-              .postId(post.getId())
+              .id(post.getId())
               .title(post.getTitle())
               .content(post.getContent())
               .author(post.getMember().getNickname())
@@ -143,6 +139,9 @@ public class PostService {
               .modifiedAt(post.getModifiedAt())
               .build()
       );
+    }
+    return ResponseDto.success(postResponseDtoList);
+  }
   @Transactional(readOnly = true)
   public ResponseDto<?> getUserPosts(UserDetailsImpl userDetails) {
 
