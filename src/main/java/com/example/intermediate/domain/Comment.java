@@ -103,5 +103,5 @@ public class Comment extends Timestamped {
             .orElse(true);//모두 지워졌다면 true를 반환
 
   }
-
 }
+

@@ -4,13 +4,16 @@ import com.example.intermediate.controller.response.CommentResponseDto;
 import com.example.intermediate.controller.response.PostResponseDto;
 import com.example.intermediate.controller.response.ReCommentResponseDto;
 import com.example.intermediate.domain.Comment;
+import com.example.intermediate.domain.Likes;
 import com.example.intermediate.domain.Member;
 import com.example.intermediate.domain.Post;
 import com.example.intermediate.controller.request.PostRequestDto;
 import com.example.intermediate.controller.response.ResponseDto;
 import com.example.intermediate.domain.ReComment;
+import com.example.intermediate.domain.UserDetailsImpl;
 import com.example.intermediate.jwt.TokenProvider;
 import com.example.intermediate.repository.CommentRepository;
+import com.example.intermediate.repository.LikesRepository;
 import com.example.intermediate.repository.PostRepository;
 
 import java.util.ArrayList;
@@ -20,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.example.intermediate.repository.ReCommentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +33,7 @@ public class PostService {
   private final ReCommentRepository recommentRepository;
   private final PostRepository postRepository;
   private final CommentRepository commentRepository;
+  private final LikesRepository likesRepository;
 
   private final TokenProvider tokenProvider;
 
@@ -138,10 +143,39 @@ public class PostService {
               .modifiedAt(post.getModifiedAt())
               .build()
       );
+  @Transactional(readOnly = true)
+  public ResponseDto<?> getUserPosts(UserDetailsImpl userDetails) {
 
+    // Post 테이블에 유저 아이디로 작성한 게시글 가져오기.
+    List<Post> posts = postRepository.findAllByMemberId(userDetails.getMember().getId());
+
+    // 만약 유저 아이디로 작성한 게시글이 없어 posts가 비어있다면 에러 처리.
+    if(posts.isEmpty()){
+      return ResponseDto.fail("NOT_FOUND", "해당 유저가 작성한 게시글이 존재하지 않습니다.");
     }
+
+    // 게시물 반환할 객체 리스트 생성
+    List<PostResponseDto> postResponseDtoList = new ArrayList<>();
+
+    // 유저가 작성한 게시글들을 postResponseDto 형식으로 postResponseDtoList에 넣어주기.
+    for(Post post : posts){
+
+      // 사용자의 id를 통해 사용자가 작성한 게시물을 가져와 PostResponseDto로 변환 후 List에 넣어주기.
+      postResponseDtoList.add(
+              PostResponseDto.builder()
+                      .id(post.getId())
+                      .author(post.getMember().getNickname())
+                      .title(post.getTitle())
+                      .content(post.getContent())
+                      .createdAt(post.getCreatedAt())
+                      .modifiedAt(post.getModifiedAt())
+                      .build()
+      );
+    }
+
     return ResponseDto.success(postResponseDtoList);
   }
+
   @Transactional
   public ResponseDto<Post> updatePost(Long id, PostRequestDto requestDto, HttpServletRequest request) {
     if (null == request.getHeader("Refresh-Token")) {
@@ -214,6 +248,27 @@ public class PostService {
       return null;
     }
     return tokenProvider.getMemberFromAuthentication();
+  }
+
+  @Transactional
+  public ResponseDto<?> postLikes(long postId, HttpServletRequest request) {
+
+    Post post = postRepository.findById(postId).orElseThrow(() -> {
+      throw new RuntimeException("게시글이 존재하지 않습니다.");
+    });
+
+    Member member = validateMember(request);
+    if(likesRepository.findLikesByMemberAndPost(member, post).isPresent()){
+      return ResponseDto.fail("ALREADY_EXIST", "이미 좋아요를 하셨습니다.");
+    }
+    Likes likes = new Likes();
+
+
+    likes.setPost(post);
+    likes.setMember(member);
+    likesRepository.save(likes);
+
+    return ResponseDto.success("success");
   }
 
 }

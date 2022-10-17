@@ -8,6 +8,7 @@ import com.example.intermediate.domain.Member;
 import com.example.intermediate.domain.Post;
 import com.example.intermediate.controller.request.CommentRequestDto;
 import com.example.intermediate.domain.ReComment;
+import com.example.intermediate.domain.UserDetailsImpl;
 import com.example.intermediate.jwt.TokenProvider;
 import com.example.intermediate.repository.CommentRepository;
 
@@ -17,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.example.intermediate.repository.ReCommentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -111,7 +113,35 @@ public class CommentService {
     return ResponseDto.success(commentResponseDtoList);
   }
 
+  @Transactional(readOnly = true)
+  public ResponseDto<?> getAllComments(@AuthenticationPrincipal UserDetailsImpl userDetails) {
 
+    // 멤버 id를 통해 Comment 테이블에서 comment를 가져오기.
+    List<Comment> comments = commentRepository.findAllByMemberId(userDetails.getMember().getId());
+
+    // 만약 유저 아이디로 작성한 댓글이 없어 comments가 비어있다면 에러 처리.
+    if(comments.isEmpty()){
+      return ResponseDto.fail("NOT_FOUND", "해당 유저가 작성한 게시글이 존재하지 않습니다.");
+    }
+
+    // 댓글 반환할 객체 리스트 생성
+    List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
+
+    for(Comment comment : comments){
+      commentResponseDtoList.add(
+          CommentResponseDto.builder()
+             .id(comment.getId())
+             .author(comment.getMember().getNickname())
+             .content(comment.getContent())
+             .createdAt(comment.getCreatedAt())
+                  .modifiedAt(comment.getModifiedAt())
+                  .build()
+      );
+    }
+
+    return ResponseDto.success(commentResponseDtoList);
+
+  }
 
   @Transactional
   public ResponseDto<?> updateComment(Long id, CommentRequestDto requestDto, HttpServletRequest request) {
