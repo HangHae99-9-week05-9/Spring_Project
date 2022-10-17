@@ -150,7 +150,7 @@ public class CommentService {
           "로그인이 필요합니다.");
     }
 
-    if (null == request.getHeader("memberization")) {
+    if (null == request.getHeader("Authorization")) {
       return ResponseDto.fail("MEMBER_NOT_FOUND",
           "로그인이 필요합니다.");
     }
