@@ -7,6 +7,7 @@ import com.example.intermediate.domain.Member;
 import com.example.intermediate.domain.Post;
 import com.example.intermediate.controller.request.PostRequestDto;
 import com.example.intermediate.controller.response.ResponseDto;
+import com.example.intermediate.domain.UserDetailsImpl;
 import com.example.intermediate.jwt.TokenProvider;
 import com.example.intermediate.repository.CommentRepository;
 import com.example.intermediate.repository.PostRepository;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -103,6 +105,55 @@ public class PostService {
   }
 
   @Transactional
+  public ResponseDto<?> getUserPosts(UserDetailsImpl userDetails) {
+
+    // Post 테이블에 유저 아이디로 작성한 게시글 가져오기.
+    List<Post> posts = postRepository.findAllByMemberId(userDetails.getMember().getId());
+
+    // 만약 유저 아이디로 작성한 게시글이 없어 posts가 비어있다면 에러 처리.
+    if(posts.isEmpty()){
+      return ResponseDto.fail("NOT_FOUND", "해당 유저가 작성한 게시글이 존재하지 않습니다.");
+    }
+
+
+    // 게시물 반환할 객체 리스트 생성
+    List<PostResponseDto> postResponseDtoList = new ArrayList<>();
+
+    // 유저가 작성한 게시글들을 postResponseDto 형식으로 postResponseDtoList에 넣어주기.
+    for(Post post : posts){
+
+      // 게시물(post)번호로 해당 게시물의 댓글을 가져와 CommentResponseDto로 변경후 List에 넣어주기.
+      List<Comment> comments = commentRepository.findAllByPost(post);
+      List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
+      for (Comment comment : comments){
+        commentResponseDtoList.add(
+            CommentResponseDto.builder()
+               .id(comment.getId())
+               .author(comment.getMember().getNickname())
+               .content(comment.getContent())
+               .createdAt(comment.getCreatedAt())
+                    .modifiedAt(comment.getModifiedAt())
+                    .build()
+        );
+      }
+
+      // 사용자의 id를 통해 사용자가 작성한 게시물을 가져와 PostResponseDto로 변환 후 List에 넣어주기.
+      postResponseDtoList.add(
+              PostResponseDto.builder()
+                      .id(post.getId())
+                      .author(post.getMember().getNickname())
+                      .title(post.getTitle())
+                      .content(post.getContent())
+                      .commentResponseDtoList(commentResponseDtoList)
+                      .createdAt(post.getCreatedAt())
+                      .modifiedAt(post.getModifiedAt())
+                      .build()
+      );
+    }
+
+    return ResponseDto.success(postResponseDtoList);
+  }
+  @Transactional
   public ResponseDto<Post> updatePost(Long id, PostRequestDto requestDto, HttpServletRequest request) {
     if (null == request.getHeader("Refresh-Token")) {
       return ResponseDto.fail("MEMBER_NOT_FOUND",
@@ -175,5 +226,6 @@ public class PostService {
     }
     return tokenProvider.getMemberFromAuthentication();
   }
+
 
 }
