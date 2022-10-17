@@ -24,10 +24,10 @@ public class ReComment extends Timestamped{
     private Comment comment;
 
     @Column(nullable = false)
-    private String reComment; // 대댓글
+    private String content; // 대댓글
 
     public void update(ReCommentRequestDto recommentRequestDto) {
-        this.reComment = recommentRequestDto.getContent();
+        this.content = recommentRequestDto.getContent();
     }
 
     public boolean validateMember(Member member) {

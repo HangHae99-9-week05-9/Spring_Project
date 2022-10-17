@@ -88,7 +88,7 @@ public class PostService {
                 ReCommentResponseDto.builder()
                         .reCommentId(reComment.getId())
                         .author(reComment.getMember().getNickname())
-                        .content(reComment.getReComment())
+                        .content(reComment.getContent())
                         .createdAt(reComment.getCreatedAt())
                         .modifiedAt(reComment.getModifiedAt())
                         .build()

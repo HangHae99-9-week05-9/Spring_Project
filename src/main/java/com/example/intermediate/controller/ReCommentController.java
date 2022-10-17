@@ -3,6 +3,8 @@ package com.example.intermediate.controller;
 import com.example.intermediate.controller.request.ReCommentRequestDto;
 import com.example.intermediate.controller.response.ResponseDto;
 import com.example.intermediate.service.ReCommentService;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -16,6 +18,15 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 public class ReCommentController {
     private final ReCommentService reCommentService;
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(
+                    name = "Refresh-Token",
+                    required = true,
+                    dataType = "string",
+                    paramType = "header"
+            )
+    })
 
     // 생성
     @RequestMapping(value = "/api/auth/recomment", method = RequestMethod.POST)

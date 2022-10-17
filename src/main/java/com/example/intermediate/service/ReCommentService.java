@@ -53,7 +53,7 @@ public class ReCommentService {
         ReComment reComment = ReComment.builder()
                 .member(member)
                 .comment(comment)
-                .reComment(requestDto.getContent())
+                .content(requestDto.getContent())
                 .build();
 
         reCommentRepository.save(reComment);
@@ -62,7 +62,7 @@ public class ReCommentService {
                 ReCommentResponseDto.builder()
                         .reCommentId(reComment.getId())
                         .author(reComment.getMember().getNickname())
-                        .content(reComment.getReComment())
+                        .content(reComment.getContent())
                         .createdAt(reComment.getCreatedAt())
                         .modifiedAt(reComment.getModifiedAt())
                         .build());
@@ -83,7 +83,7 @@ public class ReCommentService {
                     ReCommentResponseDto.builder()
                             .reCommentId(reComment.getId())
                             .author(reComment.getMember().getNickname())
-                            .content(reComment.getReComment())
+                            .content(reComment.getContent())
                             .createdAt(reComment.getCreatedAt())
                             .modifiedAt(reComment.getModifiedAt())
                             .build()
@@ -125,7 +125,7 @@ public class ReCommentService {
                 ReCommentResponseDto.builder()
                         .reCommentId(reComment.getId())
                         .author(reComment.getMember().getNickname())
-                        .content(reComment.getReComment())
+                        .content(reComment.getContent())
                         .createdAt(reComment.getCreatedAt())
                         .modifiedAt(reComment.getModifiedAt())
                         .build()

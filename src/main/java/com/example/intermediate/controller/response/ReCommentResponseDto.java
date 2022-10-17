@@ -16,8 +16,6 @@ public class ReCommentResponseDto {
 
     private final static String DEFAULT_DELETE_MESSAGE = "삭제된 댓글입니다";
 
-    private Long postId;
-    private Long parentId;
     private Long reCommentId;
     private String author;
     private String content;
