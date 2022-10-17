@@ -2,21 +2,26 @@ package com.example.intermediate.service;
 
 import com.example.intermediate.controller.response.CommentResponseDto;
 import com.example.intermediate.controller.response.PostResponseDto;
+import com.example.intermediate.controller.response.ReCommentResponseDto;
 import com.example.intermediate.domain.Comment;
 import com.example.intermediate.domain.Likes;
 import com.example.intermediate.domain.Member;
 import com.example.intermediate.domain.Post;
 import com.example.intermediate.controller.request.PostRequestDto;
 import com.example.intermediate.controller.response.ResponseDto;
+import com.example.intermediate.domain.ReComment;
 import com.example.intermediate.domain.UserDetailsImpl;
 import com.example.intermediate.jwt.TokenProvider;
 import com.example.intermediate.repository.CommentRepository;
 import com.example.intermediate.repository.LikesRepository;
 import com.example.intermediate.repository.PostRepository;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
+
+import com.example.intermediate.repository.ReCommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -25,12 +30,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class PostService {
-
+  private final ReCommentRepository recommentRepository;
   private final PostRepository postRepository;
   private final CommentRepository commentRepository;
   private final LikesRepository likesRepository;
 
   private final TokenProvider tokenProvider;
+
+
 
   @Transactional
   public ResponseDto<?> createPost(PostRequestDto requestDto, HttpServletRequest request) {
@@ -57,7 +64,7 @@ public class PostService {
     postRepository.save(post);
     return ResponseDto.success(
         PostResponseDto.builder()
-            .id(post.getId())
+            .postId(post.getId())
             .title(post.getTitle())
             .content(post.getContent())
             .author(post.getMember().getNickname())
@@ -73,40 +80,69 @@ public class PostService {
     if (null == post) {
       return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글 id 입니다.");
     }
-
     List<Comment> commentList = commentRepository.findAllByPost(post);
     List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
 
+    List<ReComment> reCommentList;
+    List<ReCommentResponseDto> reCommentResponseDtoList = null;
+
     for (Comment comment : commentList) {
+      reCommentList = recommentRepository.findAllByComment(comment);
+      for (ReComment reComment : reCommentList) {
+        reCommentResponseDtoList.add(
+                ReCommentResponseDto.builder()
+                        .reCommentId(reComment.getId())
+                        .author(reComment.getMember().getNickname())
+                        .content(reComment.getContent())
+                        .createdAt(reComment.getCreatedAt())
+                        .modifiedAt(reComment.getModifiedAt())
+                        .build()
+        );
+      }
       commentResponseDtoList.add(
-          CommentResponseDto.builder()
-              .id(comment.getId())
-              .author(comment.getMember().getNickname())
-              .content(comment.getContent())
-              .createdAt(comment.getCreatedAt())
-              .modifiedAt(comment.getModifiedAt())
-              .build()
+              CommentResponseDto.builder()
+                      .commentId(comment.getId())
+                      .author(comment.getAuthor().getNickname())
+                      .content(comment.getContent())
+                      .reCommentResponseDtoList(reCommentResponseDtoList)
+                      .createdAt(comment.getCreatedAt())
+                      .modifiedAt(comment.getModifiedAt())
+                      .build()
+
       );
     }
-
     return ResponseDto.success(
-        PostResponseDto.builder()
-            .id(post.getId())
-            .title(post.getTitle())
-            .content(post.getContent())
-            .commentResponseDtoList(commentResponseDtoList)
-            .author(post.getMember().getNickname())
-            .createdAt(post.getCreatedAt())
-            .modifiedAt(post.getModifiedAt())
-            .build()
+            PostResponseDto.builder()
+                    .postId(post.getId())
+                    .title(post.getTitle())
+                    .content(post.getContent())
+                    .commentResponseDtoList(commentResponseDtoList)
+                    .author(post.getMember().getNickname())
+                    .createdAt(post.getCreatedAt())
+                    .modifiedAt(post.getModifiedAt())
+                    .build()
     );
+
   }
 
   @Transactional(readOnly = true)
   public ResponseDto<?> getAllPost() {
-    return ResponseDto.success(postRepository.findAllByOrderByModifiedAtDesc());
-  }
+    List<Post> postList = postRepository.findAllByOrderByModifiedAtDesc();
+    List<PostResponseDto> postResponseDtoList = new ArrayList<>();
+    for (Post post : postList) {
+      List<Comment> commentList = commentRepository.findAllByPost(post);
+      List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
 
+
+      postResponseDtoList.add(PostResponseDto.builder()
+              .postId(post.getId())
+              .title(post.getTitle())
+              .content(post.getContent())
+              .author(post.getMember().getNickname())
+              .createdAt(post.getCreatedAt())
+              .modifiedAt(post.getModifiedAt())
+              .build()
+      );
   @Transactional(readOnly = true)
   public ResponseDto<?> getUserPosts(UserDetailsImpl userDetails) {
 
@@ -139,7 +175,6 @@ public class PostService {
 
     return ResponseDto.success(postResponseDtoList);
   }
-
 
   @Transactional
   public ResponseDto<Post> updatePost(Long id, PostRequestDto requestDto, HttpServletRequest request) {

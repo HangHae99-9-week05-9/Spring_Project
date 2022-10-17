@@ -5,6 +5,9 @@ import com.example.intermediate.controller.request.CommentRequestDto;
 import com.example.intermediate.domain.UserDetailsImpl;
 import com.example.intermediate.service.CommentService;
 import javax.servlet.http.HttpServletRequest;
+
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -15,7 +18,18 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class CommentController {
 
+
+
   private final CommentService commentService;
+
+  @ApiImplicitParams({
+          @ApiImplicitParam(
+                  name = "Refresh-Token",
+                  required = true,
+                  dataType = "string",
+                  paramType = "header"
+          )
+  })
 
   @PostMapping(value = "/api/auth/comment")
   public ResponseDto<?> createComment(@RequestBody CommentRequestDto requestDto,
@@ -45,5 +59,7 @@ public class CommentController {
                                       HttpServletRequest request) {
     return commentService.deleteComment(id, request);
   }
+
+
 }
 
