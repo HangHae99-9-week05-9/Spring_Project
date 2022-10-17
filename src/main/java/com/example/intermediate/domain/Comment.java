@@ -44,3 +44,6 @@ public class Comment extends Timestamped {
     return !this.member.equals(member);
   }
 }
+
+
+// 연결이 됐나?????
