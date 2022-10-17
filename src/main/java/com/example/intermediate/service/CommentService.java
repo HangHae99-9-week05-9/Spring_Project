@@ -40,7 +40,7 @@ public class CommentService {
               "로그인이 필요합니다.");
     }
 
-    if (null == request.getHeader("Authorization")) {
+    if (null == request.getHeader("memberization")) {
       return ResponseDto.fail("MEMBER_NOT_FOUND",
               "로그인이 필요합니다.");
     }
@@ -50,22 +50,22 @@ public class CommentService {
       return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
     }
 
-    Post post = postService.isPresentPost(requestDto.getPostId());
+    Post post = postService.isPresentPost(requestDto.getId());
     if (null == post) {
       return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글 id 입니다.");
     }
 
     Comment comment = Comment.builder()
-            .author(member)
+            .member(member)
             .post(post)
             .content(requestDto.getContent())
             .build();
     commentRepository.save(comment);
     return ResponseDto.success(
             CommentResponseDto.builder()
-                    .postId(comment.getPost().getId())
+                    .id(comment.getPost().getId())
                     .commentId(comment.getId())
-                    .author(comment.getAuthor().getNickname())
+                    .member(comment.getMember().getNickname())
                     .content(comment.getContent())
                     .createdAt(comment.getCreatedAt())
                     .modifiedAt(comment.getModifiedAt())
@@ -74,8 +74,8 @@ public class CommentService {
   }
 
   @Transactional(readOnly = true)
-  public ResponseDto<?> getAllCommentsByPost(Long postId) {
-    Post post = postService.isPresentPost(postId);
+  public ResponseDto<?> getAllCommentsByPost(Long id) {
+    Post post = postService.isPresentPost(id);
     if (null == post) {
       return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글 id 입니다.");
     }
@@ -91,7 +91,7 @@ public class CommentService {
         reCommentResponseDtoList.add(
                 ReCommentResponseDto.builder()
                         .reCommentId(reComment.getId())
-                        .author(reComment.getMember().getNickname())
+                        .member(reComment.getMember().getNickname())
                         .content(reComment.getContent())
                         .createdAt(reComment.getCreatedAt())
                         .modifiedAt(reComment.getModifiedAt())
@@ -100,9 +100,9 @@ public class CommentService {
       }
       commentResponseDtoList.add(
               CommentResponseDto.builder()
-                      .postId(comment.getPost().getId())
+                      .id(comment.getPost().getId())
                       .commentId(comment.getId())
-                      .author(comment.getAuthor().getNickname())
+                      .member(comment.getMember().getNickname())
                       .content(comment.getContent())
                       .reCommentResponseDtoList(reCommentResponseDtoList)
                       .createdAt(comment.getCreatedAt())
@@ -131,7 +131,7 @@ public class CommentService {
       commentResponseDtoList.add(
           CommentResponseDto.builder()
              .id(comment.getId())
-             .author(comment.getMember().getNickname())
+             .member(comment.getMember().getNickname())
              .content(comment.getContent())
              .createdAt(comment.getCreatedAt())
                   .modifiedAt(comment.getModifiedAt())
@@ -150,7 +150,7 @@ public class CommentService {
           "로그인이 필요합니다.");
     }
 
-    if (null == request.getHeader("Authorization")) {
+    if (null == request.getHeader("memberization")) {
       return ResponseDto.fail("MEMBER_NOT_FOUND",
           "로그인이 필요합니다.");
     }
@@ -160,7 +160,7 @@ public class CommentService {
       return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
     }
 
-    Post post = postService.isPresentPost(requestDto.getPostId());
+    Post post = postService.isPresentPost(requestDto.getId());
     if (null == post) {
       return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글 id 입니다.");
     }
@@ -177,9 +177,9 @@ public class CommentService {
     comment.update(requestDto);
     return ResponseDto.success(
             CommentResponseDto.builder()
-                    .postId(comment.getPost().getId())
+                    .id(comment.getPost().getId())
                     .commentId(comment.getId())
-                    .author(comment.getAuthor().getNickname())
+                    .member(comment.getMember().getNickname())
                     .content(comment.getContent())
                     .createdAt(comment.getCreatedAt())
                     .modifiedAt(comment.getModifiedAt())
@@ -197,7 +197,7 @@ public class CommentService {
           "로그인이 필요합니다.");
     }
 
-    if (null == request.getHeader("Authorization")) {
+    if (null == request.getHeader("memberization")) {
       return ResponseDto.fail("MEMBER_NOT_FOUND",
           "로그인이 필요합니다.");
     }

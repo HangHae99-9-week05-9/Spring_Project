@@ -92,7 +92,7 @@ public class PostService {
         reCommentResponseDtoList.add(
                 ReCommentResponseDto.builder()
                         .reCommentId(reComment.getId())
-                        .author(reComment.getMember().getNickname())
+                        .member(reComment.getMember().getNickname())
                         .content(reComment.getContent())
                         .createdAt(reComment.getCreatedAt())
                         .modifiedAt(reComment.getModifiedAt())
@@ -102,7 +102,7 @@ public class PostService {
       commentResponseDtoList.add(
               CommentResponseDto.builder()
                       .commentId(comment.getId())
-                      .author(comment.getAuthor().getNickname())
+                      .member(comment.getMember().getNickname())
                       .content(comment.getContent())
                       .reCommentResponseDtoList(reCommentResponseDtoList)
                       .createdAt(comment.getCreatedAt())
