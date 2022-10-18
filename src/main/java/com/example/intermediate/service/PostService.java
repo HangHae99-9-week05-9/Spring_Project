@@ -130,7 +130,7 @@ public class PostService {
   @Transactional(readOnly = true)
   public ResponseDto<?> getAllPost(Pageable pageable) {
 
-    // pagable을 넘기면 return형은 Page형이다.
+    // 매개 변수로 pagable을 넘기면 return형은 Page형이다.
     Page<Post> postList = postRepository.findAll(pageable);
 
     List<PostResponseDto> postResponseDtoList = new ArrayList<>();

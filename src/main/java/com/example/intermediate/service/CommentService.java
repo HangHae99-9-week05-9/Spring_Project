@@ -81,8 +81,7 @@ public class CommentService {
       return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글 id 입니다.");
     }
 
-    List<Comment> commentList = commentRepository.findAllByPost(post);
-
+    // 매개 변수로 pagable을 넘기면 return형은 Page형이다.
     Page<Comment> pages = commentRepository.findAll(pageable);
 
     List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();

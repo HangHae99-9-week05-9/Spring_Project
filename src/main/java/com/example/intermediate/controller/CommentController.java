@@ -42,6 +42,8 @@ public class CommentController {
   }
 
   @GetMapping(value = "/api/comment/{id}")
+
+  // 정렬 기준이 여러 개일 시 @PageableDefault만으로 안되고 @SortDefault를 사용하여 정렬해아 한다.
   public ResponseDto<?> getAllComments(@PathVariable Long id,
                                        @PageableDefault(page = 0, size = 3)
                                        @SortDefault.SortDefaults({
