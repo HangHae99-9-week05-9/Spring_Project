@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.example.intermediate.repository.ReCommentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,18 +75,20 @@ public class CommentService {
   }
 
   @Transactional(readOnly = true)
-  public ResponseDto<?> getAllCommentsByPost(Long id) {
+  public ResponseDto<?> getAllCommentsByPost(Long id, Pageable pageable) {
     Post post = postService.isPresentPost(id);
     if (null == post) {
       return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글 id 입니다.");
     }
 
-    List<Comment> commentList = commentRepository.findAllByPost(post);
+    // 매개 변수로 pagable을 넘기면 return형은 Page형이다.
+    Page<Comment> pages = commentRepository.findAll(pageable);
+
     List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
     List<ReComment> reCommentList = new ArrayList<>();
     List<ReCommentResponseDto> reCommentResponseDtoList = new ArrayList<>();
 
-    for (Comment comment : commentList) {
+    for (Comment comment : pages) { //commentList
       reCommentList = recommentRepository.findAllByComment(comment);
       for (ReComment reComment : reCommentList) {
         reCommentResponseDtoList.add(

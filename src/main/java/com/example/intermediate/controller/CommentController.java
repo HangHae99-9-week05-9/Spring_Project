@@ -9,6 +9,10 @@ import javax.servlet.http.HttpServletRequest;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -38,8 +42,16 @@ public class CommentController {
   }
 
   @GetMapping(value = "/api/comment/{id}")
-  public ResponseDto<?> getAllComments(@PathVariable Long id) {
-    return commentService.getAllCommentsByPost(id);
+
+  // 정렬 기준이 여러 개일 시 @PageableDefault만으로 안되고 @SortDefault를 사용하여 정렬해아 한다.
+  public ResponseDto<?> getAllComments(@PathVariable Long id,
+                                       @PageableDefault(page = 0, size = 3)
+                                       @SortDefault.SortDefaults({
+                                               @SortDefault(sort = "post", direction = Sort.Direction.DESC),
+                                               @SortDefault(sort = "createdAt", direction = Sort.Direction.DESC)
+                                       })
+                                               Pageable pageable) {
+    return commentService.getAllCommentsByPost(id, pageable);
   }
 
   // 멤버가 작성한 댓글 조회
