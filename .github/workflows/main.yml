@@ -11,9 +11,7 @@ permissions:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Set up JDK 17
@@ -48,8 +46,8 @@ jobs:
     - name: Deploy
       uses: appleboy/ssh-action@master
       with:
-        host: ec2-3-39-6-175.ap-northeast-2.compute.amazonaws.com
-        username: ec2-user
+        host: ec2-3-34-125-45.ap-northeast-2.compute.amazonaws.com
+        username: ubuntu
         key: ${{ secrets.PRIVATE_KEY }}
         envs: GITHUB_SHA
         script: |
