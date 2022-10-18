@@ -39,7 +39,7 @@ jobs:
         run: |
           docker login -u ${{ secrets.USERNAME }} -p ${{ secrets.PASSWORD }}
           docker build -t spring-project .
-          docker tag spring-project:${GITHUB_SHA::7}
+          docker tag spring-project spring-project:${GITHUB_SHA::7}
           docker push puri12/spring-project:${GITHUB_SHA::7}
 
         ## 4) Docker Hub에 Push한 이미지를 리눅스 서버에 받아와서 run
