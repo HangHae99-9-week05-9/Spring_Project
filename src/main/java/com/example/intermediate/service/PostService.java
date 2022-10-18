@@ -23,6 +23,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.example.intermediate.repository.ReCommentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -126,8 +128,11 @@ public class PostService {
   }
 
   @Transactional(readOnly = true)
-  public ResponseDto<?> getAllPost() {
-    List<Post> postList = postRepository.findAllByOrderByModifiedAtDesc();
+  public ResponseDto<?> getAllPost(Pageable pageable) {
+
+    // pagable을 넘기면 return형은 Page형이다.
+    Page<Post> postList = postRepository.findAll(pageable);
+
     List<PostResponseDto> postResponseDtoList = new ArrayList<>();
     for (Post post : postList) {
       postResponseDtoList.add(PostResponseDto.builder()

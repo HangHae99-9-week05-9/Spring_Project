@@ -11,6 +11,9 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -41,8 +44,9 @@ public class PostController {
   }
 
   @GetMapping(value = "/api/post")
-  public ResponseDto<?> getAllPosts() {
-    return postService.getAllPost();
+  // @Pagable을 통해 보여줄 페이시 위치(0이 시작), 한 페이지에 게시글 개수(15), 정렬 기준(createdAt), 정렬 기준의 순서(내림차순)을 정의
+  public ResponseDto<?> getAllPosts(@PageableDefault(page = 0, size = 15, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+    return postService.getAllPost(pageable);
   }
 
   @PutMapping(value = "/api/auth/post/{id}")
