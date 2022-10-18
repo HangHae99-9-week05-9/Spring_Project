@@ -2,6 +2,8 @@ package com.example.intermediate.repository;
 
 import com.example.intermediate.domain.Comment;
 import com.example.intermediate.domain.Post;
+
+import java.awt.print.Pageable;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
