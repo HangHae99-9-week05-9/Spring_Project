@@ -12,6 +12,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MemberRequestDto {
 
+  @NotBlank(message = "{member.emailId.notblank}")
+  @Pattern(regexp = "^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$", message = "{member.emailId.pattern}")
+  private String emailId;
+
   @NotBlank(message = "{member.nickname.notblank}")
   @Size(min = 4, max = 12, message = "{member.nickname.size}")
   @Pattern(regexp = "[a-z\\d]*${3,12}", message = "{member.nickname.pattern}")

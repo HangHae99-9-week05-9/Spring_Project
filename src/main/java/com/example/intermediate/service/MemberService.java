@@ -31,7 +31,12 @@ public class MemberService {
 
   @Transactional
   public ResponseDto<?> createMember(MemberRequestDto requestDto) {
-    if (null != isPresentMember(requestDto.getNickname())) {
+    if (null != isPresentMember(requestDto.getEmailId())) {
+      return ResponseDto.fail("DUPLICATED_EMAIL",
+              "중복된 아이디 입니다.");
+    }
+
+    if (null != isPresentMemberNickname(requestDto.getNickname())) {
       return ResponseDto.fail("DUPLICATED_NICKNAME",
           "중복된 닉네임 입니다.");
     }
@@ -42,13 +47,15 @@ public class MemberService {
     }
 
     Member member = Member.builder()
+            .emailId(requestDto.getEmailId())
             .nickname(requestDto.getNickname())
-                .password(passwordEncoder.encode(requestDto.getPassword()))
-                    .build();
+            .password(passwordEncoder.encode(requestDto.getPassword()))
+            .build();
     memberRepository.save(member);
     return ResponseDto.success(
         MemberResponseDto.builder()
             .id(member.getId())
+            .emailId(member.getEmailId())
             .nickname(member.getNickname())
             .createdAt(member.getCreatedAt())
             .modifiedAt(member.getModifiedAt())
@@ -58,7 +65,7 @@ public class MemberService {
 
   @Transactional
   public ResponseDto<?> login(LoginRequestDto requestDto, HttpServletResponse response) {
-    Member member = isPresentMember(requestDto.getNickname());
+    Member member = isPresentMember(requestDto.getEmailId());
     if (null == member) {
       return ResponseDto.fail("MEMBER_NOT_FOUND",
           "사용자를 찾을 수 없습니다.");
@@ -74,6 +81,7 @@ public class MemberService {
     return ResponseDto.success(
         MemberResponseDto.builder()
             .id(member.getId())
+            .emailId(member.getEmailId())
             .nickname(member.getNickname())
             .createdAt(member.getCreatedAt())
             .modifiedAt(member.getModifiedAt())
@@ -96,7 +104,13 @@ public class MemberService {
   }
 
   @Transactional(readOnly = true)
-  public Member isPresentMember(String nickname) {
+  public Member isPresentMember(String emailId) {
+    Optional<Member> optionalMember = memberRepository.findByEmailId(emailId);
+    return optionalMember.orElse(null);
+  }
+
+  @Transactional(readOnly = true)
+  public Member isPresentMemberNickname(String nickname) {
     Optional<Member> optionalMember = memberRepository.findByNickname(nickname);
     return optionalMember.orElse(null);
   }
