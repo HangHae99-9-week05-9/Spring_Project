@@ -81,4 +81,8 @@ public class PostController {
     return postService.postLikes(postid, request);
   }
 
+  @GetMapping(value = "/api/posts/likes")
+  public ResponseDto<?> getPostsLike(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    return postService.getPostsLike(userDetails);
+  }
 }
