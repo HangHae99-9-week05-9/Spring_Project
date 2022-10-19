@@ -53,4 +53,5 @@ jobs:
           script: |
             docker pull puri12/spring-project:latest
             docker stop spring-project
+            docker rm spring-project
             docker run -d --rm --name spring-project -p 80:8080 puri12/spring-project
