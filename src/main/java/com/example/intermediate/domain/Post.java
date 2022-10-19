@@ -34,6 +34,9 @@ public class Post extends Timestamped {
   @Column(nullable = false)
   private String content;
 
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<File> files;
+
   // 연관관계의 주인 설정 , 게시글 삭제시 댓글도 함께 삭제
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Comment> comments;

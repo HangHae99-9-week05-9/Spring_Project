@@ -3,23 +3,29 @@ package com.example.intermediate.controller;
 import com.example.intermediate.controller.request.PostRequestDto;
 import com.example.intermediate.controller.response.ResponseDto;
 import com.example.intermediate.domain.UserDetailsImpl;
+import com.example.intermediate.service.AwsS3Service;
 import com.example.intermediate.service.PostService;
 import javax.servlet.http.HttpServletRequest;
 
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @RestController
 public class PostController {
 
   private final PostService postService;
+  private final AwsS3Service awsS3Service;
 
   @ApiImplicitParams({
           @ApiImplicitParam(
@@ -29,10 +35,12 @@ public class PostController {
                   paramType = "header"
           )
   })
-  @PostMapping(value = "/api/auth/post")
-  public ResponseDto<?> createPost(@RequestBody PostRequestDto requestDto,
-      HttpServletRequest request) {
-    return postService.createPost(requestDto, request);
+  @PostMapping(value = "/api/auth/post", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = "application/json")
+  public ResponseDto<?> createPost(
+          @RequestPart(value = "file", required = false) MultipartFile multipartFile,
+          @RequestPart(value = "requestDto") PostRequestDto requestDto,
+          HttpServletRequest request) {
+    return postService.createPost(requestDto, multipartFile, request);
   }
 
   @GetMapping(value = "/api/post/{id}")

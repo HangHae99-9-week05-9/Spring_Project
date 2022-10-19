@@ -2,14 +2,12 @@ package com.example.intermediate.service;
 
 import com.example.intermediate.controller.response.CommentResponseDto;
 import com.example.intermediate.controller.response.PostResponseDto;
-import com.example.intermediate.domain.Likes;
-import com.example.intermediate.domain.Member;
-import com.example.intermediate.domain.Post;
+import com.example.intermediate.domain.*;
 import com.example.intermediate.controller.request.PostRequestDto;
 import com.example.intermediate.controller.response.ResponseDto;
-import com.example.intermediate.domain.UserDetailsImpl;
 import com.example.intermediate.jwt.TokenProvider;
 import com.example.intermediate.repository.CommentRepository;
+import com.example.intermediate.repository.FileRepository;
 import com.example.intermediate.repository.LikesRepository;
 import com.example.intermediate.repository.PostRepository;
 
@@ -24,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -32,13 +31,17 @@ public class PostService {
   private final PostRepository postRepository;
   private final CommentRepository commentRepository;
   private final LikesRepository likesRepository;
+  private final FileRepository fileRepository;
 
   private final TokenProvider tokenProvider;
+
+  private final AwsS3Service awsS3Service;
 
 
 
   @Transactional
-  public ResponseDto<?> createPost(PostRequestDto requestDto, HttpServletRequest request) {
+  public ResponseDto<?> createPost(PostRequestDto requestDto, MultipartFile multipartFile, HttpServletRequest request) {
+    String fileUrl = "";
     if (null == request.getHeader("Refresh-Token")) {
       return ResponseDto.fail("MEMBER_NOT_FOUND",
           "로그인이 필요합니다.");
@@ -55,16 +58,27 @@ public class PostService {
     }
 
     Post post = Post.builder()
-        .title(requestDto.getTitle())
-        .content(requestDto.getContent())
-        .member(member)
-        .build();
+            .title(requestDto.getTitle())
+            .content(requestDto.getContent())
+            .member(member)
+            .build();
     postRepository.save(post);
+    if (multipartFile != null) {
+      fileUrl = awsS3Service.uploadFileV1(multipartFile);
+      File file = File.builder()
+              .post(post)
+              .member(member)
+              .url(fileUrl)
+              .build();
+      fileRepository.save(file);
+    }
+
     return ResponseDto.success(
         PostResponseDto.builder()
             .id(post.getId())
             .title(post.getTitle())
             .content(post.getContent())
+            .imageUrl(fileUrl)
             .author(post.getMember().getNickname())
             .createdAt(post.getCreatedAt())
             .modifiedAt(post.getModifiedAt())
