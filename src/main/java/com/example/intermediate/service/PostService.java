@@ -275,9 +275,8 @@ public class PostService {
     return ResponseDto.success("success");
   }
 
-  public ResponseDto<?> getPostsLike(Long memberId) {
-    Member member = new Member();
-    member.setId(memberId);
+  public ResponseDto<?> getPostsLike(UserDetailsImpl userDetails) {
+    Member member = userDetails.getMember();
     List<Likes> likelist = likesRepository.findLikesByMember(member);
 
     if (likelist.isEmpty()) {
