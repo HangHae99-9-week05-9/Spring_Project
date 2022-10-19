@@ -2,12 +2,9 @@ package com.example.intermediate.service;
 
 import com.example.intermediate.controller.response.CommentResponseDto;
 import com.example.intermediate.controller.response.PostResponseDto;
-import com.example.intermediate.domain.Likes;
-import com.example.intermediate.domain.Member;
-import com.example.intermediate.domain.Post;
+import com.example.intermediate.domain.*;
 import com.example.intermediate.controller.request.PostRequestDto;
 import com.example.intermediate.controller.response.ResponseDto;
-import com.example.intermediate.domain.UserDetailsImpl;
 import com.example.intermediate.jwt.TokenProvider;
 import com.example.intermediate.repository.CommentRepository;
 import com.example.intermediate.repository.LikesRepository;
@@ -58,6 +55,7 @@ public class PostService {
         .title(requestDto.getTitle())
         .content(requestDto.getContent())
         .member(member)
+        .postCategory(requestDto.getPostCategory())
         .build();
     postRepository.save(post);
     return ResponseDto.success(
@@ -114,6 +112,34 @@ public class PostService {
     }
     return ResponseDto.success(postResponseDtoList);
   }
+
+  // 카테고리 별로 게시글 조회하기
+  @Transactional
+  public ResponseDto<?> getPostsByCategory(String category) {
+    PostCategory categoryEnum = PostCategory.valueOf(category);
+    List<Post> posts = postRepository.findByPostCategory(categoryEnum);
+
+    if(posts.isEmpty()){
+      return ResponseDto.fail("NOT_FOUND", "해당 유저가 작성한 게시글이 존재하지 않습니다.");
+    }
+
+    List<PostResponseDto> postResponseDtoList = new ArrayList<>();
+
+    for (Post post : posts) {
+      postResponseDtoList.add(PostResponseDto.builder()
+              .id(post.getId())
+              .title(post.getTitle())
+              .content(post.getContent())
+                      .postCategory(post.getPostCategory())
+              .createdAt(post.getCreatedAt())
+              .modifiedAt(post.getModifiedAt())
+              .build()
+      );
+    }
+    return ResponseDto.success(postResponseDtoList);
+  }
+
+
   @Transactional(readOnly = true)
   public ResponseDto<?> getUserPosts(UserDetailsImpl userDetails) {
 
