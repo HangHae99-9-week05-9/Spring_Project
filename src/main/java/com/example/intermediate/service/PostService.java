@@ -275,4 +275,34 @@ public class PostService {
     return ResponseDto.success("success");
   }
 
+  public ResponseDto<?> getPostsLike(Long memberId) {
+    Member member = new Member();
+    member.setId(memberId);
+    List<Likes> likelist = likesRepository.findLikesByMember(member);
+
+    if (likelist.isEmpty()) {
+      ResponseDto.fail("NOT_FOUND", "좋아요한 게시글이 없습니다.");
+    }
+
+    List<PostResponseDto> postResDtoList = new ArrayList<>();
+
+    for (Likes like : likelist) {
+      Post post = like.getPost();
+
+      postResDtoList.add(
+              PostResponseDto.builder()
+                      .id(post.getId())
+                      .title(post.getTitle())
+                      .content(post.getContent())
+                      .author(post.getMember().getNickname())
+                      .createdAt(post.getCreatedAt())
+                      .modifiedAt(post.getModifiedAt())
+                      .build()
+      );
+    }
+
+    return ResponseDto.success(postResDtoList);
+  }
+
+
 }

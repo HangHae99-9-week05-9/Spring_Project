@@ -81,4 +81,8 @@ public class PostController {
     return postService.postLikes(postid, request);
   }
 
+  @GetMapping(value = "/api/member/{memberId}/likes")
+  public ResponseDto<?> getPostsLike(@PathVariable Long memberId) {
+    return postService.getPostsLike(memberId);
+  }
 }
