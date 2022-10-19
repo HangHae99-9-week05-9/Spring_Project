@@ -7,14 +7,15 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Builder
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
