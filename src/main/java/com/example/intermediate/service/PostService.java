@@ -2,14 +2,11 @@ package com.example.intermediate.service;
 
 import com.example.intermediate.controller.response.CommentResponseDto;
 import com.example.intermediate.controller.response.PostResponseDto;
-import com.example.intermediate.controller.response.ReCommentResponseDto;
-import com.example.intermediate.domain.Comment;
 import com.example.intermediate.domain.Likes;
 import com.example.intermediate.domain.Member;
 import com.example.intermediate.domain.Post;
 import com.example.intermediate.controller.request.PostRequestDto;
 import com.example.intermediate.controller.response.ResponseDto;
-import com.example.intermediate.domain.ReComment;
 import com.example.intermediate.domain.UserDetailsImpl;
 import com.example.intermediate.jwt.TokenProvider;
 import com.example.intermediate.repository.CommentRepository;
@@ -21,18 +18,17 @@ import java.util.List;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 
-import com.example.intermediate.repository.ReCommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class PostService {
-  private final ReCommentRepository recommentRepository;
+
   private final PostRepository postRepository;
   private final CommentRepository commentRepository;
   private final LikesRepository likesRepository;
@@ -82,37 +78,8 @@ public class PostService {
     if (null == post) {
       return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글 id 입니다.");
     }
-    List<Comment> commentList = commentRepository.findAllByPost(post);
-    List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
+    List<CommentResponseDto> commentResponseDtoList = CommentResponseDto.toDtoList(commentRepository.findAllWithMemberAndParentByPostIdOrderByParentIdAscNullsFirstCommentIdAsc((id)));
 
-    List<ReComment> reCommentList;
-    List<ReCommentResponseDto> reCommentResponseDtoList = null;
-
-    for (Comment comment : commentList) {
-      reCommentList = recommentRepository.findAllByComment(comment);
-      for (ReComment reComment : reCommentList) {
-        reCommentResponseDtoList.add(
-                ReCommentResponseDto.builder()
-                        .reCommentId(reComment.getId())
-                        .member(reComment.getMember().getNickname())
-                        .content(reComment.getContent())
-                        .createdAt(reComment.getCreatedAt())
-                        .modifiedAt(reComment.getModifiedAt())
-                        .build()
-        );
-      }
-      commentResponseDtoList.add(
-              CommentResponseDto.builder()
-                      .commentId(comment.getId())
-                      .member(comment.getMember().getNickname())
-                      .content(comment.getContent())
-                      .reCommentResponseDtoList(reCommentResponseDtoList)
-                      .createdAt(comment.getCreatedAt())
-                      .modifiedAt(comment.getModifiedAt())
-                      .build()
-
-      );
-    }
     return ResponseDto.success(
             PostResponseDto.builder()
                     .id(post.getId())
