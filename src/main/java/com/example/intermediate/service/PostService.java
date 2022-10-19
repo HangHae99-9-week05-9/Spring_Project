@@ -1,13 +1,12 @@
 package com.example.intermediate.service;
 
+import com.example.intermediate.controller.exception.CustomException;
+import com.example.intermediate.controller.exception.ErrorCode;
 import com.example.intermediate.controller.response.CommentResponseDto;
 import com.example.intermediate.controller.response.PostResponseDto;
-import com.example.intermediate.domain.Likes;
-import com.example.intermediate.domain.Member;
-import com.example.intermediate.domain.Post;
+import com.example.intermediate.domain.*;
 import com.example.intermediate.controller.request.PostRequestDto;
 import com.example.intermediate.controller.response.ResponseDto;
-import com.example.intermediate.domain.UserDetailsImpl;
 import com.example.intermediate.jwt.TokenProvider;
 import com.example.intermediate.repository.CommentRepository;
 import com.example.intermediate.repository.LikesRepository;
@@ -21,7 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,19 +37,12 @@ public class PostService {
 
   @Transactional
   public ResponseDto<?> createPost(PostRequestDto requestDto, HttpServletRequest request) {
-    if (null == request.getHeader("Refresh-Token")) {
-      return ResponseDto.fail("MEMBER_NOT_FOUND",
-          "로그인이 필요합니다.");
+    if (null == request.getHeader("Refresh-Token") || null == request.getHeader("Authorization")) {
+      throw new CustomException(ErrorCode.MEMBER_LOGIN_REQUIRED);
     }
-
-    if (null == request.getHeader("Authorization")) {
-      return ResponseDto.fail("MEMBER_NOT_FOUND",
-          "로그인이 필요합니다.");
-    }
-
     Member member = validateMember(request);
     if (null == member) {
-      return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
+      throw new CustomException(ErrorCode.LOGIN_WRONG_FORM_JWT_TOKEN);
     }
 
     Post post = Post.builder()
@@ -76,7 +67,7 @@ public class PostService {
   public ResponseDto<?> getPost(Long id) {
     Post post = isPresentPost(id);
     if (null == post) {
-      return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글 id 입니다.");
+      throw new CustomException(ErrorCode.POST_NOT_FOUND);
     }
     List<CommentResponseDto> commentResponseDtoList = CommentResponseDto.toDtoList(commentRepository.findAllWithMemberAndParentByPostIdOrderByParentIdAscNullsFirstCommentIdAsc((id)));
 
@@ -122,7 +113,7 @@ public class PostService {
 
     // 만약 유저 아이디로 작성한 게시글이 없어 posts가 비어있다면 에러 처리.
     if(posts.isEmpty()){
-      return ResponseDto.fail("NOT_FOUND", "해당 유저가 작성한 게시글이 존재하지 않습니다.");
+      throw new CustomException(ErrorCode.MEMBER_POST_NOT_FOUND);
     }
 
     // 게시물 반환할 객체 리스트 생성
@@ -149,28 +140,22 @@ public class PostService {
 
   @Transactional
   public ResponseDto<Post> updatePost(Long id, PostRequestDto requestDto, HttpServletRequest request) {
-    if (null == request.getHeader("Refresh-Token")) {
-      return ResponseDto.fail("MEMBER_NOT_FOUND",
-          "로그인이 필요합니다.");
+    if (null == request.getHeader("Refresh-Token") || null == request.getHeader("Authorization")) {
+      throw new CustomException(ErrorCode.MEMBER_LOGIN_REQUIRED);
     }
-
-    if (null == request.getHeader("Authorization")) {
-      return ResponseDto.fail("MEMBER_NOT_FOUND",
-          "로그인이 필요합니다.");
-    }
-
     Member member = validateMember(request);
     if (null == member) {
-      return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
+      throw new CustomException(ErrorCode.LOGIN_WRONG_FORM_JWT_TOKEN);
     }
 
     Post post = isPresentPost(id);
     if (null == post) {
-      return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글 id 입니다.");
+      throw new CustomException(ErrorCode.POST_NOT_FOUND);
     }
 
+
     if (post.validateMember(member)) {
-      return ResponseDto.fail("BAD_REQUEST", "작성자만 수정할 수 있습니다.");
+      throw new CustomException(ErrorCode.MEMBER_NOT_VALIDATED);
     }
 
     post.update(requestDto);
@@ -179,30 +164,23 @@ public class PostService {
 
   @Transactional
   public ResponseDto<?> deletePost(Long id, HttpServletRequest request) {
-    if (null == request.getHeader("Refresh-Token")) {
-      return ResponseDto.fail("MEMBER_NOT_FOUND",
-          "로그인이 필요합니다.");
+    if (null == request.getHeader("Refresh-Token") || null == request.getHeader("Authorization")) {
+      throw new CustomException(ErrorCode.MEMBER_LOGIN_REQUIRED);
     }
-
-    if (null == request.getHeader("Authorization")) {
-      return ResponseDto.fail("MEMBER_NOT_FOUND",
-          "로그인이 필요합니다.");
-    }
-
     Member member = validateMember(request);
     if (null == member) {
-      return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
+      throw new CustomException(ErrorCode.LOGIN_WRONG_FORM_JWT_TOKEN);
     }
 
     Post post = isPresentPost(id);
     if (null == post) {
-      return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글 id 입니다.");
+      throw new CustomException(ErrorCode.POST_NOT_FOUND);
     }
+
 
     if (post.validateMember(member)) {
-      return ResponseDto.fail("BAD_REQUEST", "작성자만 삭제할 수 있습니다.");
+      throw new CustomException(ErrorCode.MEMBER_NOT_VALIDATED);
     }
-
     postRepository.delete(post);
     return ResponseDto.success("delete success");
   }
@@ -222,15 +200,17 @@ public class PostService {
   }
 
   @Transactional
-  public ResponseDto<?> postLikes(long postId, HttpServletRequest request) {
+  public ResponseDto<?> postLikes(Long postId, HttpServletRequest request) {
 
-    Post post = postRepository.findById(postId).orElseThrow(() -> {
-      throw new RuntimeException("게시글이 존재하지 않습니다.");
-    });
+    Post post = isPresentPost(postId);
+    if (null == post) {
+      throw new CustomException(ErrorCode.POST_NOT_FOUND);
+    }
 
     Member member = validateMember(request);
     if(likesRepository.findLikesByMemberAndPost(member, post).isPresent()){
-      return ResponseDto.fail("ALREADY_EXIST", "이미 좋아요를 하셨습니다.");
+      throw new CustomException(ErrorCode.ALREADY_PUT_LIKE);
+
     }
     Likes likes = new Likes();
 
@@ -247,7 +227,7 @@ public class PostService {
     List<Likes> likelist = likesRepository.findLikesByMember(member);
 
     if (likelist.isEmpty()) {
-      ResponseDto.fail("NOT_FOUND", "좋아요한 게시글이 없습니다.");
+      throw new CustomException(ErrorCode.NOT_FOUND_LIKES);
     }
 
     List<PostResponseDto> postResDtoList = new ArrayList<>();
