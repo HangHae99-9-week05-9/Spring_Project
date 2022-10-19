@@ -8,14 +8,11 @@ import javax.servlet.http.HttpServletRequest;
 
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -39,7 +36,7 @@ public class PostController {
   }
 
   @GetMapping(value = "/api/post/{id}")
-  public ResponseDto<?> getPost(@PathVariable Long id) {
+  public ResponseDto<?> getPost(@PathVariable  Long id) {
     return postService.getPost(id);
   }
 
@@ -50,7 +47,7 @@ public class PostController {
   }
 
   @PutMapping(value = "/api/auth/post/{id}")
-  public ResponseDto<?> updatePost(@PathVariable Long id, @RequestBody PostRequestDto postRequestDto,
+  public ResponseDto<?> updatePost(@PathVariable  Long id, @RequestBody PostRequestDto postRequestDto,
       HttpServletRequest request) {
     return postService.updatePost(id, postRequestDto, request);
   }
@@ -77,7 +74,7 @@ public class PostController {
           )
   })
   @PostMapping(value = "api/posts/{postid}/likes")
-  public ResponseDto<?> postLikes(@PathVariable Long postid, HttpServletRequest request) {
+  public ResponseDto<?> postLikes(@PathVariable  Long postid, HttpServletRequest request) {
     return postService.postLikes(postid, request);
   }
 

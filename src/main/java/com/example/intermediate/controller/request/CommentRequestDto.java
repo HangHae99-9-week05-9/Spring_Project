@@ -1,18 +1,18 @@
 package com.example.intermediate.controller.request;
 
-import com.example.intermediate.controller.response.CommentResponseDto;
-import com.example.intermediate.domain.Comment;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.Nullable;
 
 
 
-@Getter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class CommentRequestDto {
-  private Long id;
+  @Nullable
+  private Long parentId;
+  private Long postId;
   private String content;
-
 }

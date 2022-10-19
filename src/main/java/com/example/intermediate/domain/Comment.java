@@ -8,6 +8,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +21,7 @@ import java.util.Optional;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Slf4j
 public class Comment extends Timestamped {
 
   @Id
@@ -31,34 +35,56 @@ public class Comment extends Timestamped {
   @JoinColumn(name = "post_id", nullable = false)
   @ManyToOne(fetch = FetchType.LAZY)
   private Post post;
-  @JoinColumn(name = "parent_id")
-  @ManyToOne(fetch = FetchType.LAZY)
-  private Comment parent;
 
   @Column(nullable = false)
   private String content;
 
-
   // 댓글 삭제 추가
-  private boolean isRemoved = false;
+  private boolean isRemoved;
 
+  @JoinColumn(name = "parent_id")
+  @ManyToOne(fetch = FetchType.LAZY)
+  //OnDelete는 JPA에서는 단일한 DELETE 쿼리만 전송하여 참조하는 레코드들을 연쇄적으로 제거해줌
+  //CascadeTypa.REMOVE 방식은 JPA에서 외래 키를 통해 참조하는 레코드들을 제거하기 위해 그 개수만큼 DELETE 쿼리 전송해야함
+  // 참고: https://kukekyakya.tistory.com/m/546
+  @OnDelete(action = OnDeleteAction.CASCADE)
+  private Comment parent;
 
-  //상위댓글에 대댓글 리스트 연결, 부모댓글을 삭제해도 자식 댓글은 남아있음
-  @OneToMany(mappedBy = "parent", orphanRemoval = true)
-  private List<Comment> childList = new ArrayList<>();
+  @Builder.Default
+  // 각 댓글의 하위 댓글을 참조 가능하도록 연관관계 맺음
+  @OneToMany(mappedBy = "parent")
+  private List<Comment> children = new ArrayList<>();
 
-
-  // 대댓글 작성할 댓글 확인
-  public void confirmParent(Comment parent){
+  public Comment(String content, Member member, Post post, Comment parent) {
+    this.content = content;
+    this.member = member;
+    this.post = post;
     this.parent = parent;
-    parent.addChild(this);
+    this.isRemoved = false;
   }
 
-  // 대댓글 작성
-  public void addChild(Comment child){
-    childList.add(child);
+  // 현재 댓글 기준으로 실제로 삭제 가능한 댓글을 찾아줌
+  // 이 메소드의 결과로 찾아낸 댓글이 없다면 실제 데이터를 제거하는 것이 아니라 remove 메소드로 삭제 표시만 해줘야함
+  public Optional<Comment> findDeletableComment() {
+    return hasChildren() ? Optional.empty() : Optional.of(findDeletableCommentByParent());
   }
 
+  private Comment findDeletableCommentByParent() {
+    if (isRemovedParent()) {
+      Comment deletableParent = getParent().findDeletableCommentByParent();
+      if(getParent().getChildren().size() == 1) return deletableParent;
+    }
+    return this;
+  }
+
+  private boolean hasChildren() {
+    return getChildren().size() != 0;
+  }
+
+  //현재 댓글이 삭제 가능한지 판별
+  private boolean isRemovedParent() {
+    return getParent() != null && getParent().isRemoved();
+  }
 
   public void update(CommentRequestDto commentRequestDto) {
     this.content = commentRequestDto.getContent();
@@ -70,38 +96,5 @@ public class Comment extends Timestamped {
     return !this.member.equals(member);
   }
 
-  public List<Comment> findRemovableList() {
-
-    List<Comment> result = new ArrayList<>();
-
-    Optional.ofNullable(this.parent).ifPresentOrElse(
-
-            parentComment ->{//대댓글인 경우 (부모가 존재하는 경우)
-              if( parentComment.isRemoved()&& parentComment.isAllChildRemoved()){
-                result.addAll(parentComment.getChildList());
-                result.add(parentComment);
-              }
-            },
-
-            () -> {//댓글인 경우
-              if (isAllChildRemoved()) {
-                result.add(this);
-                result.addAll(this.getChildList());
-              }
-            }
-    );
-
-    return result;
-  }
-
-  //모든 자식 댓글이 삭제되었는지 판단
-  private boolean isAllChildRemoved() {
-    return getChildList().stream()//
-            .map(Comment::isRemoved)//지워졌는지 여부로 바꾼다
-            .filter(isRemove -> !isRemove)//지워졌으면 true, 안지워졌으면 false이다. 따라서 filter에 걸러지는 것은 false인것이고, 있다면 false를 없다면 orElse를 통해 true를 반환한다.
-            .findAny()//지워지지 않은게 하나라도 있다면 false를 반환
-            .orElse(true);//모두 지워졌다면 true를 반환
-
-  }
 }
 
