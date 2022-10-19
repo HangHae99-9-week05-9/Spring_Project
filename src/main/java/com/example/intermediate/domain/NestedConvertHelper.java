@@ -1,6 +1,7 @@
 package com.example.intermediate.domain;
 
-import com.example.intermediate.controller.exception.CannotConvertNestedStructureException;
+import com.example.intermediate.controller.exception.CustomException;
+import com.example.intermediate.controller.exception.ErrorCode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,7 +35,7 @@ public class NestedConvertHelper<K, E, D> {
         try {
             return convertInternal();
         } catch (NullPointerException e) {
-            throw new CannotConvertNestedStructureException(e.getMessage());
+            throw new CustomException(ErrorCode.CONVERT_NESTED_STRUCTURE);
         }
     }
 
