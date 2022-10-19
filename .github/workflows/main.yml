@@ -52,5 +52,5 @@ jobs:
           envs: GITHUB_SHA
           script: |
             docker pull puri12/spring-project:latest
-            docker stop server
+            docker stop spring-project
             docker run -d --rm --name spring-project -p 80:8080 puri12/spring-project
