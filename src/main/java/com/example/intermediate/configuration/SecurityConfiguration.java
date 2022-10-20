@@ -56,9 +56,9 @@ public class SecurityConfiguration {
 
         .and()
         .authorizeRequests()
-        .antMatchers("/api/member/**").permitAll()
-        .antMatchers("/api/post/**").permitAll()
-        .antMatchers("/api/comment/**").permitAll()
+        .antMatchers("/api/members/**").permitAll()
+        .antMatchers("/api/posts/**").permitAll()
+        .antMatchers("/api/comments/**").permitAll()
         .antMatchers( "/v2/api-docs",
                       "/swagger-resources",
                       "/swagger-resources/**",
