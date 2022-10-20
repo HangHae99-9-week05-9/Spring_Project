@@ -29,10 +29,10 @@ public class CommentResponseDto {
   public static List<CommentResponseDto> toDtoList(List<Comment> comments) {
     NestedConvertHelper helper = NestedConvertHelper.newInstance(
             comments,
-            c -> new CommentResponseDto(c.getId(), c.isRemoved() ? null : c.getContent(), c.isRemoved() ? null : String.valueOf(c.getMember().getNickname()), c.getCreatedAt(), c.getModifiedAt(),new ArrayList<>()),
-            c -> c.getParent(),
-            c -> c.getId(),
-            d -> d.getChildren());
+            c -> new CommentResponseDto(c.getId(), c.isRemoved() ? null : c.getContent(), c.isRemoved() ? null : c.getMember().getNickname(), c.getCreatedAt(), c.getModifiedAt(),new ArrayList<>()),
+            Comment::getParent,
+            Comment::getId,
+            CommentResponseDto::getChildren);
     return helper.convert();
 
 

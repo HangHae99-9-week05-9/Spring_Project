@@ -1,20 +1,16 @@
 package com.example.intermediate.controller;
 
+import com.example.intermediate.configuration.SwaggerAnnotation;
 import com.example.intermediate.controller.response.ResponseDto;
 import com.example.intermediate.controller.request.CommentRequestDto;
-import com.example.intermediate.domain.UserDetailsImpl;
 import com.example.intermediate.service.CommentService;
-
 import javax.servlet.http.HttpServletRequest;
 
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,19 +26,14 @@ public class CommentController {
     //                   POST                      *
     //**********************************************
 
-    @ApiImplicitParams({
-            @ApiImplicitParam(
-                    name = "Refresh-Token",
-                    required = true,
-                    dataType = "string",
-                    paramType = "header"
-            )
-    })
+
+    @SwaggerAnnotation
     // 게시글에 대한 댓글 작성
-    @PostMapping(value = "/api/auth/comments")
-    public ResponseDto<?> createComments(@RequestBody CommentRequestDto requestDto,
+    @PostMapping(value = "/api/auth/{postId}/comments")
+    public ResponseDto<?> createComments(@PathVariable Long postId,
+                                         @RequestBody CommentRequestDto requestDto,
                                          HttpServletRequest request) {
-        return commentService.createComment(requestDto, request);
+        return commentService.createComment(postId, requestDto, request);
     }
 
 
@@ -66,8 +57,8 @@ public class CommentController {
 
     // 멤버가 작성한 댓글 조회
     @GetMapping(value = "/api/auth/comments")
-    public ResponseDto<?> getUserComments(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return commentService.getAllComments(userDetails);
+    public ResponseDto<?> getUserComments(HttpServletRequest request) {
+        return commentService.getAllComments(request);
     }
 
 
@@ -76,6 +67,7 @@ public class CommentController {
     //**********************************************
 
     // 댓글 수정
+    @SwaggerAnnotation
     @PutMapping(value = "/api/auth/comments/{id}")
     public ResponseDto<?> updateComments(@PathVariable Long id, @RequestBody CommentRequestDto requestDto,
                                          HttpServletRequest request) {
@@ -88,6 +80,7 @@ public class CommentController {
     //**********************************************
 
     // 댓글 삭제
+    @SwaggerAnnotation
     @DeleteMapping(value = "/api/auth/comments/{id}")
     public ResponseDto<?> deleteComments(@PathVariable Long id,
                                          HttpServletRequest request) {
