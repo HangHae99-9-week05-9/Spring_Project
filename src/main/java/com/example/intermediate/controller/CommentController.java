@@ -4,6 +4,7 @@ import com.example.intermediate.controller.response.ResponseDto;
 import com.example.intermediate.controller.request.CommentRequestDto;
 import com.example.intermediate.domain.UserDetailsImpl;
 import com.example.intermediate.service.CommentService;
+
 import javax.servlet.http.HttpServletRequest;
 
 import io.swagger.annotations.ApiImplicitParam;
@@ -11,7 +12,6 @@ import io.swagger.annotations.ApiImplicitParams;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.query.Param;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,56 +23,75 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class CommentController {
 
+    private final CommentService commentService;
 
 
-  private final CommentService commentService;
+    //**********************************************
+    //                   POST                      *
+    //**********************************************
 
-  @ApiImplicitParams({
-          @ApiImplicitParam(
-                  name = "Refresh-Token",
-                  required = true,
-                  dataType = "string",
-                  paramType = "header"
-          )
-  })
-
-  @PostMapping(value = "/api/auth/comment")
-  public ResponseDto<?> createComment(@RequestBody CommentRequestDto requestDto,
-                                      HttpServletRequest request) {
-    return commentService.createComment(requestDto, request);
-  }
-
-  @GetMapping(value = "/api/comment/{id}")
-
-  // 정렬 기준이 여러 개일 시 @PageableDefault만으로 안되고 @SortDefault를 사용하여 정렬해아 한다.
-  public ResponseDto<?> getAllComments(@PathVariable  Long id,
-                                       @PageableDefault(page = 0, size = 3)
-                                       @SortDefault.SortDefaults({
-                                               @SortDefault(sort = "post", direction = Sort.Direction.DESC),
-                                               @SortDefault(sort = "createdAt", direction = Sort.Direction.DESC)
-                                       })
-                                               Pageable pageable) {
-    return commentService.getAllCommentsByPost(id, pageable);
-  }
-
-  // 멤버가 작성한 댓글 조회
-  @GetMapping(value = "/api/auth/comments")
-  public ResponseDto<?> userComments(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-    return commentService.getAllComments(userDetails);
-  }
-
-  @PutMapping(value = "/api/auth/comment/{id}")
-  public ResponseDto<?> updateComment(@PathVariable Long id, @RequestBody CommentRequestDto requestDto,
-                                      HttpServletRequest request) {
-    return commentService.updateComment(id, requestDto, request);
-  }
-
-  @DeleteMapping(value = "/api/auth/comment/{id}")
-  public ResponseDto<?> deleteComment(@PathVariable  Long id,
-                                      HttpServletRequest request) {
-    return commentService.deleteComment(id, request);
-  }
+    @ApiImplicitParams({
+            @ApiImplicitParam(
+                    name = "Refresh-Token",
+                    required = true,
+                    dataType = "string",
+                    paramType = "header"
+            )
+    })
+    // 게시글에 대한 댓글 작성
+    @PostMapping(value = "/api/auth/comments")
+    public ResponseDto<?> createComments(@RequestBody CommentRequestDto requestDto,
+                                         HttpServletRequest request) {
+        return commentService.createComment(requestDto, request);
+    }
 
 
+    //**********************************************
+    //                   GET                       *
+    //**********************************************
+
+    // 게시글에 대한 모든 댓글 조회
+    @GetMapping(value = "/api/comments/{id}")
+    // 정렬 기준이 여러 개일 시 @PageableDefault만으로 안되고 @SortDefault를 사용하여 정렬해아 한다.
+    public ResponseDto<?> getAllComments(@PathVariable Long id,
+                                         @PageableDefault(page = 0, size = 3)
+                                         @SortDefault.SortDefaults({
+                                                 @SortDefault(sort = "post", direction = Sort.Direction.DESC),
+                                                 @SortDefault(sort = "createdAt", direction = Sort.Direction.DESC)
+                                         })
+                                         Pageable pageable) {
+        return commentService.getAllCommentsByPost(id, pageable);
+    }
+
+
+    // 멤버가 작성한 댓글 조회
+    @GetMapping(value = "/api/auth/comments")
+    public ResponseDto<?> getUserComments(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return commentService.getAllComments(userDetails);
+    }
+
+
+    //**********************************************
+    //                   PUT                       *
+    //**********************************************
+
+    // 댓글 수정
+    @PutMapping(value = "/api/auth/comments/{id}")
+    public ResponseDto<?> updateComments(@PathVariable Long id, @RequestBody CommentRequestDto requestDto,
+                                         HttpServletRequest request) {
+        return commentService.updateComment(id, requestDto, request);
+    }
+
+
+    //**********************************************
+    //                   DELETE                    *
+    //**********************************************
+
+    // 댓글 삭제
+    @DeleteMapping(value = "/api/auth/comments/{id}")
+    public ResponseDto<?> deleteComments(@PathVariable Long id,
+                                         HttpServletRequest request) {
+        return commentService.deleteComment(id, request);
+    }
 }
 
