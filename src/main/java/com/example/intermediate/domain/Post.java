@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Formula;
 
 @Builder
 @Getter
@@ -36,6 +37,10 @@ public class Post extends Timestamped {
 
   @Convert(converter = PostCategoryConverter.class)
   private PostCategory postCategory;
+
+
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "post", cascade = CascadeType.ALL)
+  private List<Likes> likes;
 
 
   public void update(PostRequestDto postRequestDto) {
