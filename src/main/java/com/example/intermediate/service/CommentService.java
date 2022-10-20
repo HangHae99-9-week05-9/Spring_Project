@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class CommentService {
 
@@ -32,7 +33,7 @@ public class CommentService {
   private final PostService postService;
 
   @Transactional
-  public ResponseDto<?> createComment(CommentRequestDto requestDto, HttpServletRequest request) {
+  public ResponseDto<?> createComment(Long postId, CommentRequestDto requestDto, HttpServletRequest request) {
     if (null == request.getHeader("Refresh-Token") || null == request.getHeader("Authorization")) {
       throw new CustomException(ErrorCode.MEMBER_LOGIN_REQUIRED);
     }
@@ -42,16 +43,23 @@ public class CommentService {
       throw new CustomException(ErrorCode.LOGIN_WRONG_FORM_JWT_TOKEN);
     }
 
-    Post post = postService.isPresentPost(requestDto.getPostId());
+    Post post = postService.isPresentPost(postId);
     if (null == post) {
       throw new CustomException(ErrorCode.POST_NOT_FOUND);
     }
 
     Comment parent = Optional.ofNullable(requestDto.getParentId())
-            .map(id -> commentRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND)))
+            .map(parentId -> commentRepository.findById(parentId).orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND)))
             .orElse(null);
 
-    Comment comment = commentRepository.save(new Comment(requestDto.getContent(), member, post, parent));
+    Comment comment = commentRepository.save(
+            Comment.builder()
+                    .content(requestDto.getContent())
+                    .member(member)
+                    .post(post)
+                    .parent(parent)
+                    .build());
+
     return ResponseDto.success(
             CommentResponseDto.builder()
                     .id(comment.getPost().getId())
@@ -116,11 +124,6 @@ public class CommentService {
     Member member = validateMember(request);
     if (null == member) {
       throw new CustomException(ErrorCode.LOGIN_WRONG_FORM_JWT_TOKEN);
-    }
-
-    Post post = postService.isPresentPost(requestDto.getPostId());
-    if (null == post) {
-      throw new CustomException(ErrorCode.POST_NOT_FOUND);
     }
 
     Comment comment = isPresentComment(id);

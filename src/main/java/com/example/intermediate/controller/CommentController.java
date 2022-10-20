@@ -11,7 +11,6 @@ import io.swagger.annotations.ApiImplicitParams;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.query.Param;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -37,9 +36,9 @@ public class CommentController {
   })
 
   @PostMapping(value = "/api/auth/{postId}/comments")
-  public ResponseDto<?> createComment(@PathVariable  Long id, @RequestBody CommentRequestDto requestDto,
+  public ResponseDto<?> createComment(@PathVariable  Long postId, @RequestBody CommentRequestDto requestDto,
                                       HttpServletRequest request) {
-    return commentService.createComment(id, requestDto, request);
+    return commentService.createComment(postId, requestDto, request);
   }
 
   @GetMapping(value = "/api/comments/{id}")

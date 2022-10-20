@@ -13,6 +13,6 @@ import org.springframework.lang.Nullable;
 public class CommentRequestDto {
   @Nullable
   private Long parentId;
-  private Long postId;
+
   private String content;
 }
