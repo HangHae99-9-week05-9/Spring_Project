@@ -60,8 +60,8 @@ public class PostController {
 
   // 멤버가 작성한 글 조회
   @GetMapping(value = "/api/auth/posts")
-  public ResponseDto<?> userPosts(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-    return postService.getUserPosts(userDetails);
+  public ResponseDto<?> userPosts(HttpServletRequest request) {
+    return postService.getUserPosts(request);
   }
 
   @DeleteMapping(value = "/api/auth/post/{id}")
@@ -85,7 +85,7 @@ public class PostController {
   }
 
   @GetMapping(value = "/api/posts/likes")
-  public ResponseDto<?> getPostsLike(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-    return postService.getPostsLike(userDetails);
+  public ResponseDto<?> getPostsLike(HttpServletRequest request) {
+    return postService.getPostsLike(request);
   }
 }
