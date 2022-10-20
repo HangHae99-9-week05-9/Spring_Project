@@ -67,8 +67,8 @@ public class CommentController {
 
     // 멤버가 작성한 댓글 조회
     @GetMapping(value = "/api/auth/comments")
-    public ResponseDto<?> getUserComments(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return commentService.getAllComments(userDetails);
+    public ResponseDto<?> getUserComments(HttpServletRequest request) {
+        return commentService.getAllComments(request);
     }
 
 

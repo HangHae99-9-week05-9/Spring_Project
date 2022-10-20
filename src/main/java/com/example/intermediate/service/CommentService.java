@@ -87,10 +87,18 @@ public class CommentService {
   }
 
   @Transactional(readOnly = true)
-  public ResponseDto<?> getAllComments(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+  public ResponseDto<?> getAllComments(HttpServletRequest request) {
+    if (null == request.getHeader("Refresh-Token") || null == request.getHeader("Authorization")) {
+      throw new CustomException(ErrorCode.MEMBER_LOGIN_REQUIRED);
+    }
+
+    Member member = validateMember(request);
+    if (null == member) {
+      throw new CustomException(ErrorCode.LOGIN_WRONG_FORM_JWT_TOKEN);
+    }
 
     // 멤버 id를 통해 Comment 테이블에서 comment를 가져오기.
-    List<Comment> comments = commentRepository.findAllByMemberId(userDetails.getMember().getId());
+    List<Comment> comments = commentRepository.findAllByMemberId(member.getId());
 
     // 만약 유저 아이디로 작성한 댓글이 없어 comments가 비어있다면 에러 처리.
     if(comments.isEmpty()){
