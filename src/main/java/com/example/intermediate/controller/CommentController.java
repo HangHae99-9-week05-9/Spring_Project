@@ -36,13 +36,13 @@ public class CommentController {
           )
   })
 
-  @PostMapping(value = "/api/auth/comment")
-  public ResponseDto<?> createComment(@RequestBody CommentRequestDto requestDto,
+  @PostMapping(value = "/api/auth/{postId}/comments")
+  public ResponseDto<?> createComment(@PathVariable  Long id, @RequestBody CommentRequestDto requestDto,
                                       HttpServletRequest request) {
-    return commentService.createComment(requestDto, request);
+    return commentService.createComment(id, requestDto, request);
   }
 
-  @GetMapping(value = "/api/comment/{id}")
+  @GetMapping(value = "/api/comments/{id}")
 
   // 정렬 기준이 여러 개일 시 @PageableDefault만으로 안되고 @SortDefault를 사용하여 정렬해아 한다.
   public ResponseDto<?> getAllComments(@PathVariable  Long id,
@@ -61,14 +61,14 @@ public class CommentController {
     return commentService.getAllComments(userDetails);
   }
 
-  @PutMapping(value = "/api/auth/comment/{id}")
+  @PutMapping(value = "/api/auth/comments/{commentId}")
   public ResponseDto<?> updateComment(@PathVariable Long id, @RequestBody CommentRequestDto requestDto,
                                       HttpServletRequest request) {
     return commentService.updateComment(id, requestDto, request);
   }
 
-  @DeleteMapping(value = "/api/auth/comment/{id}")
-  public ResponseDto<?> deleteComment(@PathVariable  Long id,
+  @DeleteMapping(value = "/api/auth/comments/{commentId}")
+  public ResponseDto<?> deleteComment(@PathVariable Long id,
                                       HttpServletRequest request) {
     return commentService.deleteComment(id, request);
   }
