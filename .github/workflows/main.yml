@@ -20,12 +20,14 @@ jobs:
           java-version: '17'
 
         ## 1) git ignore에 등록된 application.properties 파일 생성해주기
-      - name: make application.properties
+      - name: make ENV
         run: |
           mkdir ./src/main/resources
           cd ./src/main/resources
           touch ./application.properties
           echo "${{ secrets.PROPERTIES }}" > ./application.properties
+          touch ./message.properties
+          echo "${{ secrets.MESSAGE }}" > ./message.properties
         shell: bash
 
         ## 2) 스프링 프로젝트 jar 파일 빌드
