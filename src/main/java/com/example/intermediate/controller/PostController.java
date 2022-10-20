@@ -1,5 +1,6 @@
 package com.example.intermediate.controller;
 
+import com.example.intermediate.configuration.SwaggerAnnotation;
 import com.example.intermediate.controller.request.PostRequestDto;
 import com.example.intermediate.controller.response.ResponseDto;
 import com.example.intermediate.domain.UserDetailsImpl;
@@ -27,30 +28,18 @@ public class PostController {
     //                   POST                      *
     //**********************************************
 
-    @ApiImplicitParams({
-            @ApiImplicitParam(
-                    name = "Refresh-Token",
-                    required = true,
-                    dataType = "string",
-                    paramType = "header"
-            )
-    })
+
     // 게시글 작성
+    @SwaggerAnnotation
     @PostMapping(value = "/api/auth/posts")
     public ResponseDto<?> createPosts(@RequestBody PostRequestDto requestDto,
                                       HttpServletRequest request) {
         return postService.createPost(requestDto, request);
     }
 
-    @ApiImplicitParams({
-            @ApiImplicitParam(
-                    name = "Refresh-Token",
-                    required = true,
-                    dataType = "string",
-                    paramType = "header"
-            )
-    })
+
     // 게시글 좋아요
+    @SwaggerAnnotation
     @PostMapping(value = "api/posts/{postid}/likes")
     public ResponseDto<?> likesPosts(@PathVariable Long postid, HttpServletRequest request) {
         return postService.postLikes(postid, request);
@@ -75,13 +64,15 @@ public class PostController {
     }
 
     // 멤버가 작성한 글 조회
+    @SwaggerAnnotation
     @GetMapping(value = "/api/auth/members/posts")
     public ResponseDto<?> userPosts(HttpServletRequest request) {
       return postService.getUserPosts(request);
     }
 
     // 멤버가 좋아요한 글 조회
-    @GetMapping(value = "/api/members/posts/likes")
+    @SwaggerAnnotation
+    @GetMapping(value = "/api/auth/members/posts/likes")
     public ResponseDto<?> getPostsLike(HttpServletRequest request) {
       return postService.getPostsLike(request);
     }
@@ -92,6 +83,7 @@ public class PostController {
     //**********************************************
 
     // 게시글 수정
+    @SwaggerAnnotation
     @PutMapping(value = "/api/auth/posts/{id}")
     public ResponseDto<?> updatePosts(@PathVariable Long id, @RequestBody PostRequestDto postRequestDto,
                                       HttpServletRequest request) {
@@ -104,6 +96,7 @@ public class PostController {
     //**********************************************
 
     //게시글 삭제
+    @SwaggerAnnotation
     @DeleteMapping(value = "/api/auth/posts/{id}")
     public ResponseDto<?> deletePosts(@PathVariable Long id,
                                       HttpServletRequest request) {

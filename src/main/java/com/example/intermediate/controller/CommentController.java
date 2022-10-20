@@ -27,8 +27,8 @@ public class CommentController {
     //**********************************************
 
 
-    @SwaggerAnnotation
     // 게시글에 대한 댓글 작성
+    @SwaggerAnnotation
     @PostMapping(value = "/api/auth/{postId}/comments")
     public ResponseDto<?> createComments(@PathVariable Long postId,
                                          @RequestBody CommentRequestDto requestDto,
@@ -56,6 +56,7 @@ public class CommentController {
 
 
     // 멤버가 작성한 댓글 조회
+    @SwaggerAnnotation
     @GetMapping(value = "/api/auth/comments")
     public ResponseDto<?> getUserComments(HttpServletRequest request) {
         return commentService.getAllComments(request);
