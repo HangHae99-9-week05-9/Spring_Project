@@ -4,6 +4,7 @@ import com.example.intermediate.controller.request.PostRequestDto;
 import com.example.intermediate.controller.response.ResponseDto;
 import com.example.intermediate.domain.UserDetailsImpl;
 import com.example.intermediate.service.PostService;
+
 import javax.servlet.http.HttpServletRequest;
 
 import io.swagger.annotations.ApiImplicitParam;
@@ -19,73 +20,93 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class PostController {
 
-  private final PostService postService;
-
-  @ApiImplicitParams({
-          @ApiImplicitParam(
-                  name = "Refresh-Token",
-                  required = true,
-                  dataType = "string",
-                  paramType = "header"
-          )
-  })
-  @PostMapping(value = "/api/auth/post")
-  public ResponseDto<?> createPost(@RequestBody PostRequestDto requestDto,
-      HttpServletRequest request) {
-    return postService.createPost(requestDto, request);
-  }
-
-  @GetMapping(value = "/api/post/{id}")
-  public ResponseDto<?> getPost(@PathVariable  Long id) {
-    return postService.getPost(id);
-  }
-
-  @GetMapping(value = "/api/post")
-  // @Pagable을 통해 보여줄 페이시 위치(0이 시작), 한 페이지에 게시글 개수(15), 정렬 기준(createdAt), 정렬 기준의 순서(내림차순)을 정의
-  public ResponseDto<?> getAllPosts(@PageableDefault(page = 0, size = 15, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-    return postService.getAllPost(pageable);
-  }
-
-  // 카테고리 별로 게시글 조회하기
-  @GetMapping(value = "api/post/category/{category}")
-  public ResponseDto<?> getPostsByCategory(@PathVariable String category) {
-    return postService.getPostsByCategory(category);
-  }
-
-  @PutMapping(value = "/api/auth/post/{id}")
-  public ResponseDto<?> updatePost(@PathVariable  Long id, @RequestBody PostRequestDto postRequestDto,
-      HttpServletRequest request) {
-    return postService.updatePost(id, postRequestDto, request);
-  }
-
-  // 멤버가 작성한 글 조회
-  @GetMapping(value = "/api/auth/posts")
-  public ResponseDto<?> userPosts(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-    return postService.getUserPosts(userDetails);
-  }
-
-  @DeleteMapping(value = "/api/auth/post/{id}")
-  public ResponseDto<?> deletePost(@PathVariable Long id,
-      HttpServletRequest request) {
-    return postService.deletePost(id, request);
-  }
+    private final PostService postService;
 
 
-  @ApiImplicitParams({
-          @ApiImplicitParam(
-                  name = "Refresh-Token",
-                  required = true,
-                  dataType = "string",
-                  paramType = "header"
-          )
-  })
-  @PostMapping(value = "api/posts/{postid}/likes")
-  public ResponseDto<?> postLikes(@PathVariable  Long postid, HttpServletRequest request) {
-    return postService.postLikes(postid, request);
-  }
+    //**********************************************
+    //                   POST                      *
+    //**********************************************
 
-  @GetMapping(value = "/api/posts/likes")
-  public ResponseDto<?> getPostsLike(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-    return postService.getPostsLike(userDetails);
-  }
+    @ApiImplicitParams({
+            @ApiImplicitParam(
+                    name = "Refresh-Token",
+                    required = true,
+                    dataType = "string",
+                    paramType = "header"
+            )
+    })
+    // 게시글 작성
+    @PostMapping(value = "/api/auth/posts")
+    public ResponseDto<?> createPosts(@RequestBody PostRequestDto requestDto,
+                                      HttpServletRequest request) {
+        return postService.createPost(requestDto, request);
+    }
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(
+                    name = "Refresh-Token",
+                    required = true,
+                    dataType = "string",
+                    paramType = "header"
+            )
+    })
+    // 게시글 좋아요
+    @PostMapping(value = "api/posts/{postid}/likes")
+    public ResponseDto<?> likesPosts(@PathVariable Long postid, HttpServletRequest request) {
+        return postService.postLikes(postid, request);
+    }
+
+
+    //**********************************************
+    //                   GET                       *
+    //**********************************************
+
+    // 모든 게시물 조회
+    @GetMapping(value = "/api/posts")
+    // @Pagable을 통해 보여줄 페이시 위치(0이 시작), 한 페이지에 게시글 개수(15), 정렬 기준(createdAt), 정렬 기준의 순서(내림차순)을 정의
+    public ResponseDto<?> getAllPosts(@PageableDefault(page = 0, size = 15, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return postService.getAllPost(pageable);
+    }
+
+    // 게시물 상세조회
+    @GetMapping(value = "/api/posts/{id}")
+    public ResponseDto<?> getPosts(@PathVariable Long id) {
+        return postService.getPost(id);
+    }
+
+    // 멤버가 작성한 글 조회
+    @GetMapping(value = "/api/auth/members/posts")
+    public ResponseDto<?> getMembersPosts(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return postService.getUserPosts(userDetails);
+    }
+
+    // 멤버가 좋아요한 글 조회
+    @GetMapping(value = "/api/members/posts/likes")
+    public ResponseDto<?> getLikesPosts(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return postService.getPostsLike(userDetails);
+    }
+
+
+    //**********************************************
+    //                   PUT                       *
+    //**********************************************
+
+    // 게시글 수정
+    @PutMapping(value = "/api/auth/posts/{id}")
+    public ResponseDto<?> updatePosts(@PathVariable Long id, @RequestBody PostRequestDto postRequestDto,
+                                      HttpServletRequest request) {
+        return postService.updatePost(id, postRequestDto, request);
+    }
+
+
+    //**********************************************
+    //                   DELETE                    *
+    //**********************************************
+
+    //게시글 삭제
+    @DeleteMapping(value = "/api/auth/posts/{id}")
+    public ResponseDto<?> deletePosts(@PathVariable Long id,
+                                      HttpServletRequest request) {
+        return postService.deletePost(id, request);
+    }
 }
