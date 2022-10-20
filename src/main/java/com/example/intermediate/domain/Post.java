@@ -38,6 +38,10 @@ public class Post extends Timestamped {
   private PostCategory postCategory;
 
 
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "post", cascade = CascadeType.ALL)
+  private List<Likes> likes;
+
+
   public void update(PostRequestDto postRequestDto) {
     this.title = postRequestDto.getTitle();
     this.content = postRequestDto.getContent();
