@@ -1,8 +1,9 @@
 package com.example.intermediate.service;
 
+import com.example.intermediate.controller.exception.CustomException;
+import com.example.intermediate.controller.exception.ErrorCode;
 import com.example.intermediate.controller.response.MemberResponseDto;
 import com.example.intermediate.domain.Member;
-import com.example.intermediate.domain.RefreshToken;
 import com.example.intermediate.controller.request.LoginRequestDto;
 import com.example.intermediate.controller.request.MemberRequestDto;
 import com.example.intermediate.controller.response.ResponseDto;
@@ -13,9 +14,6 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,18 +30,16 @@ public class MemberService {
   @Transactional
   public ResponseDto<?> createMember(MemberRequestDto requestDto) {
     if (null != isPresentMember(requestDto.getEmailId())) {
-      return ResponseDto.fail("DUPLICATED_EMAIL",
-              "중복된 아이디 입니다.");
+      throw new CustomException(ErrorCode.DUPLICATED_EMAIL);
     }
 
     if (null != isPresentMemberNickname(requestDto.getNickname())) {
-      return ResponseDto.fail("DUPLICATED_NICKNAME",
-          "중복된 닉네임 입니다.");
+      throw new CustomException(ErrorCode.DUPLICATED_NICKNAME);
+
     }
 
     if (!requestDto.getPassword().equals(requestDto.getPasswordConfirm())) {
-      return ResponseDto.fail("PASSWORDS_NOT_MATCHED",
-          "비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+      throw new CustomException(ErrorCode.PASSWORD_CONFIRM_FAIL);
     }
 
     Member member = Member.builder()
@@ -67,12 +63,11 @@ public class MemberService {
   public ResponseDto<?> login(LoginRequestDto requestDto, HttpServletResponse response) {
     Member member = isPresentMember(requestDto.getEmailId());
     if (null == member) {
-      return ResponseDto.fail("MEMBER_NOT_FOUND",
-          "사용자를 찾을 수 없습니다.");
+      throw new CustomException(ErrorCode.LOGIN_MEMBER_ID_FAIL);
     }
 
     if (!member.validatePassword(passwordEncoder, requestDto.getPassword())) {
-      return ResponseDto.fail("INVALID_MEMBER", "사용자를 찾을 수 없습니다.");
+      throw new CustomException(ErrorCode.LOGIN_MEMBER_ID_FAIL);
     }
 
     TokenDto tokenDto = tokenProvider.generateTokenDto(member);
@@ -92,14 +87,12 @@ public class MemberService {
 
   public ResponseDto<?> logout(HttpServletRequest request) {
     if (!tokenProvider.validateToken(request.getHeader("Refresh-Token"))) {
-      return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
+      throw new CustomException(ErrorCode.LOGIN_WRONG_FORM_JWT_TOKEN);
     }
     Member member = tokenProvider.getMemberFromAuthentication();
     if (null == member) {
-      return ResponseDto.fail("MEMBER_NOT_FOUND",
-          "사용자를 찾을 수 없습니다.");
+      throw new CustomException(ErrorCode.LOGIN_MEMBER_ID_FAIL);
     }
-
     return tokenProvider.deleteRefreshToken(member);
   }
 

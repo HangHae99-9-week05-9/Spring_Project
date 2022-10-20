@@ -1,6 +1,7 @@
 package com.example.intermediate.service;
 
-import com.example.intermediate.controller.exception.CommentNotFoundException;
+import com.example.intermediate.controller.exception.CustomException;
+import com.example.intermediate.controller.exception.ErrorCode;
 import com.example.intermediate.controller.response.ResponseDto;
 import com.example.intermediate.controller.response.CommentResponseDto;
 import com.example.intermediate.domain.Comment;
@@ -17,7 +18,6 @@ import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
-import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,28 +33,22 @@ public class CommentService {
 
   @Transactional
   public ResponseDto<?> createComment(CommentRequestDto requestDto, HttpServletRequest request) {
-    if (null == request.getHeader("Refresh-Token")) {
-      return ResponseDto.fail("MEMBER_NOT_FOUND",
-              "로그인이 필요합니다.");
-    }
-
-    if (null == request.getHeader("Authorization")) {
-      return ResponseDto.fail("MEMBER_NOT_FOUND",
-              "로그인이 필요합니다.");
+    if (null == request.getHeader("Refresh-Token") || null == request.getHeader("Authorization")) {
+      throw new CustomException(ErrorCode.MEMBER_LOGIN_REQUIRED);
     }
 
     Member member = validateMember(request);
     if (null == member) {
-      return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
+      throw new CustomException(ErrorCode.LOGIN_WRONG_FORM_JWT_TOKEN);
     }
 
     Post post = postService.isPresentPost(requestDto.getPostId());
     if (null == post) {
-      return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글 id 입니다.");
+      throw new CustomException(ErrorCode.POST_NOT_FOUND);
     }
 
     Comment parent = Optional.ofNullable(requestDto.getParentId())
-            .map(id -> commentRepository.findById(id).orElseThrow(CommentNotFoundException::new))
+            .map(id -> commentRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND)))
             .orElse(null);
 
     Comment comment = commentRepository.save(new Comment(requestDto.getContent(), member, post, parent));
@@ -73,7 +67,7 @@ public class CommentService {
   public ResponseDto<?> getAllCommentsByPost( Long id, Pageable pageable) {
     Post post = postService.isPresentPost(id);
     if (null == post) {
-      return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글 id 입니다.");
+      throw new CustomException(ErrorCode.POST_NOT_FOUND);
     }
 
     // 매개 변수로 pagable을 넘기면 return형은 Page형이다.
@@ -92,7 +86,7 @@ public class CommentService {
 
     // 만약 유저 아이디로 작성한 댓글이 없어 comments가 비어있다면 에러 처리.
     if(comments.isEmpty()){
-      return ResponseDto.fail("NOT_FOUND", "해당 유저가 작성한 게시글이 존재하지 않습니다.");
+      throw new CustomException(ErrorCode.POST_NOT_FOUND);
     }
 
     // 댓글 반환할 객체 리스트 생성
@@ -116,33 +110,26 @@ public class CommentService {
 
   @Transactional
   public ResponseDto<?> updateComment( Long id, CommentRequestDto requestDto, HttpServletRequest request) {
-    if (null == request.getHeader("Refresh-Token")) {
-      return ResponseDto.fail("MEMBER_NOT_FOUND",
-          "로그인이 필요합니다.");
+    if (null == request.getHeader("Refresh-Token") || null == request.getHeader("Authorization")) {
+      throw new CustomException(ErrorCode.MEMBER_LOGIN_REQUIRED);
     }
-
-    if (null == request.getHeader("Authorization")) {
-      return ResponseDto.fail("MEMBER_NOT_FOUND",
-          "로그인이 필요합니다.");
-    }
-
     Member member = validateMember(request);
     if (null == member) {
-      return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
+      throw new CustomException(ErrorCode.LOGIN_WRONG_FORM_JWT_TOKEN);
     }
 
     Post post = postService.isPresentPost(requestDto.getPostId());
     if (null == post) {
-      return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글 id 입니다.");
+      throw new CustomException(ErrorCode.POST_NOT_FOUND);
     }
 
     Comment comment = isPresentComment(id);
     if (null == comment) {
-      return ResponseDto.fail("NOT_FOUND", "존재하지 않는 댓글 id 입니다.");
+      throw new CustomException(ErrorCode.COMMENT_NOT_FOUND);
     }
 
     if (comment.validateMember(member)) {
-      return ResponseDto.fail("BAD_REQUEST", "작성자만 수정할 수 있습니다.");
+      throw new CustomException(ErrorCode.MEMBER_NOT_VALIDATED);
     }
 
     comment.update(requestDto);
@@ -160,31 +147,23 @@ public class CommentService {
 
   @Transactional
   public ResponseDto<?> deleteComment( Long id, HttpServletRequest request) {
-    if (null == request.getHeader("Refresh-Token")) {
-      return ResponseDto.fail("MEMBER_NOT_FOUND",
-          "로그인이 필요합니다.");
+    if (null == request.getHeader("Refresh-Token") || null == request.getHeader("Authorization")) {
+      throw new CustomException(ErrorCode.MEMBER_LOGIN_REQUIRED);
     }
-
-    if (null == request.getHeader("Authorization")) {
-      return ResponseDto.fail("MEMBER_NOT_FOUND",
-          "로그인이 필요합니다.");
-    }
-
     Member member = validateMember(request);
     if (null == member) {
-      return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
+      throw new CustomException(ErrorCode.LOGIN_WRONG_FORM_JWT_TOKEN);
     }
 
     Comment commentId = isPresentComment(id);
     if (null == commentId) {
-      return ResponseDto.fail("NOT_FOUND", "존재하지 않는 댓글 id 입니다.");
+      throw new CustomException(ErrorCode.COMMENT_NOT_FOUND);
     }
 
     if (commentId.validateMember(member)) {
-      return ResponseDto.fail("BAD_REQUEST", "작성자만 수정할 수 있습니다.");
+      throw new CustomException(ErrorCode.MEMBER_NOT_VALIDATED);
     }
-
-    Comment comment = commentRepository.findWithParentById(id).orElseThrow(CommentNotFoundException::new);
+    Comment comment = commentRepository.findWithParentById(id).orElseThrow( () -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
     comment.findDeletableComment().ifPresentOrElse(commentRepository::delete, comment::remove);
 
     return ResponseDto.success("success");

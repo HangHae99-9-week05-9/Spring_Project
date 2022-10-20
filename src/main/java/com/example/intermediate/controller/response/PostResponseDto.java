@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import com.example.intermediate.domain.Comment;
 import com.example.intermediate.domain.Post;
+import com.example.intermediate.domain.PostCategory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,6 +24,7 @@ public class PostResponseDto {
   private String content;
   private String author;
   private List<CommentResponseDto> commentResponseDtoList;
+  private PostCategory postCategory;
   private LocalDateTime createdAt;
   private LocalDateTime modifiedAt;
 
