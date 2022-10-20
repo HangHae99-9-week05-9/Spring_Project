@@ -49,6 +49,7 @@ public class PostService {
         .title(requestDto.getTitle())
         .content(requestDto.getContent())
         .member(member)
+        .postCategory(requestDto.getPostCategory())
         .build();
     postRepository.save(post);
     return ResponseDto.success(
@@ -105,6 +106,34 @@ public class PostService {
     }
     return ResponseDto.success(postResponseDtoList);
   }
+
+  // 카테고리 별로 게시글 조회하기
+  @Transactional
+  public ResponseDto<?> getPostsByCategory(String category) {
+    PostCategory categoryEnum = PostCategory.valueOf(category);
+    List<Post> posts = postRepository.findByPostCategory(categoryEnum);
+
+    if(posts.isEmpty()){
+      return ResponseDto.fail("NOT_FOUND", "해당 유저가 작성한 게시글이 존재하지 않습니다.");
+    }
+
+    List<PostResponseDto> postResponseDtoList = new ArrayList<>();
+
+    for (Post post : posts) {
+      postResponseDtoList.add(PostResponseDto.builder()
+              .id(post.getId())
+              .title(post.getTitle())
+              .content(post.getContent())
+                      .postCategory(post.getPostCategory())
+              .createdAt(post.getCreatedAt())
+              .modifiedAt(post.getModifiedAt())
+              .build()
+      );
+    }
+    return ResponseDto.success(postResponseDtoList);
+  }
+
+
   @Transactional(readOnly = true)
   public ResponseDto<?> getUserPosts(UserDetailsImpl userDetails) {
 

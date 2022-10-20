@@ -46,6 +46,12 @@ public class PostController {
     return postService.getAllPost(pageable);
   }
 
+  // 카테고리 별로 게시글 조회하기
+  @GetMapping(value = "api/post/category/{category}")
+  public ResponseDto<?> getPostsByCategory(@PathVariable String category) {
+    return postService.getPostsByCategory(category);
+  }
+
   @PutMapping(value = "/api/auth/post/{id}")
   public ResponseDto<?> updatePost(@PathVariable  Long id, @RequestBody PostRequestDto postRequestDto,
       HttpServletRequest request) {
