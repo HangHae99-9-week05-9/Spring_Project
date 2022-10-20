@@ -49,6 +49,7 @@ public class PostService {
         .title(requestDto.getTitle())
         .content(requestDto.getContent())
         .member(member)
+        .postCategory(requestDto.getPostCategory())
         .build();
     postRepository.save(post);
     return ResponseDto.success(
@@ -57,6 +58,7 @@ public class PostService {
             .title(post.getTitle())
             .content(post.getContent())
             .author(post.getMember().getNickname())
+            .postCategory(post.getPostCategory())
             .createdAt(post.getCreatedAt())
             .modifiedAt(post.getModifiedAt())
             .build()
@@ -76,8 +78,10 @@ public class PostService {
                     .id(post.getId())
                     .title(post.getTitle())
                     .content(post.getContent())
-                    .commentResponseDtoList(commentResponseDtoList)
                     .author(post.getMember().getNickname())
+                    .postCategory(post.getPostCategory())
+                    .commentResponseDtoList(commentResponseDtoList)
+                    .likesCount(post.getLikes().size())
                     .createdAt(post.getCreatedAt())
                     .modifiedAt(post.getModifiedAt())
                     .build()
@@ -98,6 +102,8 @@ public class PostService {
               .title(post.getTitle())
               .content(post.getContent())
               .author(post.getMember().getNickname())
+              .postCategory(post.getPostCategory())
+              .likesCount(post.getLikes().size())
               .createdAt(post.getCreatedAt())
               .modifiedAt(post.getModifiedAt())
               .build()
@@ -105,11 +111,50 @@ public class PostService {
     }
     return ResponseDto.success(postResponseDtoList);
   }
+
+  // 카테고리 별로 게시글 조회하기
+  @Transactional
+  public ResponseDto<?> getPostsByCategory(String category) {
+    PostCategory categoryEnum = PostCategory.valueOf(category);
+    List<Post> posts = postRepository.findByPostCategory(categoryEnum);
+
+    if(posts.isEmpty()){
+      return ResponseDto.fail("NOT_FOUND", "해당 유저가 작성한 게시글이 존재하지 않습니다.");
+    }
+
+    List<PostResponseDto> postResponseDtoList = new ArrayList<>();
+
+    for (Post post : posts) {
+      postResponseDtoList.add(PostResponseDto.builder()
+              .id(post.getId())
+              .title(post.getTitle())
+              .content(post.getContent())
+              .author(post.getMember().getNickname())
+              .postCategory(post.getPostCategory())
+              .postCategory(post.getPostCategory())
+              .likesCount(post.getLikes().size())
+              .createdAt(post.getCreatedAt())
+              .modifiedAt(post.getModifiedAt())
+              .build()
+      );
+    }
+    return ResponseDto.success(postResponseDtoList);
+  }
+
+
   @Transactional(readOnly = true)
-  public ResponseDto<?> getUserPosts(UserDetailsImpl userDetails) {
+  public ResponseDto<?> getUserPosts(HttpServletRequest request) {
+
+    if (null == request.getHeader("Refresh-Token") || null == request.getHeader("Authorization")) {
+      throw new CustomException(ErrorCode.MEMBER_LOGIN_REQUIRED);
+    }
+    Member member = validateMember(request);
+    if (null == member) {
+      throw new CustomException(ErrorCode.LOGIN_WRONG_FORM_JWT_TOKEN);
+    }
 
     // Post 테이블에 유저 아이디로 작성한 게시글 가져오기.
-    List<Post> posts = postRepository.findAllByMemberId(userDetails.getMember().getId());
+    List<Post> posts = postRepository.findAllByMemberId(member.getId());
 
     // 만약 유저 아이디로 작성한 게시글이 없어 posts가 비어있다면 에러 처리.
     if(posts.isEmpty()){
@@ -129,6 +174,8 @@ public class PostService {
                       .author(post.getMember().getNickname())
                       .title(post.getTitle())
                       .content(post.getContent())
+                      .postCategory(post.getPostCategory())
+                      .likesCount(post.getLikes().size())
                       .createdAt(post.getCreatedAt())
                       .modifiedAt(post.getModifiedAt())
                       .build()
@@ -207,7 +254,15 @@ public class PostService {
       throw new CustomException(ErrorCode.POST_NOT_FOUND);
     }
 
+    if (null == request.getHeader("Refresh-Token") || null == request.getHeader("Authorization")) {
+      throw new CustomException(ErrorCode.MEMBER_LOGIN_REQUIRED);
+    }
     Member member = validateMember(request);
+    if (null == member) {
+      throw new CustomException(ErrorCode.LOGIN_WRONG_FORM_JWT_TOKEN);
+    }
+
+
     if(likesRepository.findLikesByMemberAndPost(member, post).isPresent()){
       throw new CustomException(ErrorCode.ALREADY_PUT_LIKE);
 
@@ -219,11 +274,19 @@ public class PostService {
     likes.setMember(member);
     likesRepository.save(likes);
 
-    return ResponseDto.success("success");
+    return ResponseDto.success("좋아요를 하셨습니다.");
   }
 
-  public ResponseDto<?> getPostsLike(UserDetailsImpl userDetails) {
-    Member member = userDetails.getMember();
+  public ResponseDto<?> getPostsLike(HttpServletRequest request) {
+
+    if (null == request.getHeader("Refresh-Token") || null == request.getHeader("Authorization")) {
+      throw new CustomException(ErrorCode.MEMBER_LOGIN_REQUIRED);
+    }
+    Member member = validateMember(request);
+    if (null == member) {
+      throw new CustomException(ErrorCode.LOGIN_WRONG_FORM_JWT_TOKEN);
+    }
+
     List<Likes> likelist = likesRepository.findLikesByMember(member);
 
     if (likelist.isEmpty()) {
@@ -241,6 +304,8 @@ public class PostService {
                       .title(post.getTitle())
                       .content(post.getContent())
                       .author(post.getMember().getNickname())
+                      .postCategory(post.getPostCategory())
+                      .likesCount(post.getLikes().size())
                       .createdAt(post.getCreatedAt())
                       .modifiedAt(post.getModifiedAt())
                       .build()

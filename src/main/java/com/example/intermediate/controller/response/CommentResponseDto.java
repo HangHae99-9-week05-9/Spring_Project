@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.intermediate.domain.Comment;
-import com.example.intermediate.domain.Member;
 import com.example.intermediate.domain.NestedConvertHelper;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,4 +37,7 @@ public class CommentResponseDto {
 
 
   }
+
+
+
 }
