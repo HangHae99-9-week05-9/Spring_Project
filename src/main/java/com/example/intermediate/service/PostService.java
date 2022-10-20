@@ -58,6 +58,7 @@ public class PostService {
             .title(post.getTitle())
             .content(post.getContent())
             .author(post.getMember().getNickname())
+            .postCategory(post.getPostCategory())
             .createdAt(post.getCreatedAt())
             .modifiedAt(post.getModifiedAt())
             .build()
@@ -77,8 +78,9 @@ public class PostService {
                     .id(post.getId())
                     .title(post.getTitle())
                     .content(post.getContent())
-                    .commentResponseDtoList(commentResponseDtoList)
                     .author(post.getMember().getNickname())
+                    .postCategory(post.getPostCategory())
+                    .commentResponseDtoList(commentResponseDtoList)
                     .createdAt(post.getCreatedAt())
                     .modifiedAt(post.getModifiedAt())
                     .build()
@@ -99,6 +101,7 @@ public class PostService {
               .title(post.getTitle())
               .content(post.getContent())
               .author(post.getMember().getNickname())
+              .postCategory(post.getPostCategory())
               .createdAt(post.getCreatedAt())
               .modifiedAt(post.getModifiedAt())
               .build()
@@ -124,7 +127,8 @@ public class PostService {
               .id(post.getId())
               .title(post.getTitle())
               .content(post.getContent())
-                      .postCategory(post.getPostCategory())
+              .author(post.getMember().getNickname())
+              .postCategory(post.getPostCategory())
               .createdAt(post.getCreatedAt())
               .modifiedAt(post.getModifiedAt())
               .build()
@@ -135,10 +139,18 @@ public class PostService {
 
 
   @Transactional(readOnly = true)
-  public ResponseDto<?> getUserPosts(UserDetailsImpl userDetails) {
+  public ResponseDto<?> getUserPosts(HttpServletRequest request) {
+
+    if (null == request.getHeader("Refresh-Token") || null == request.getHeader("Authorization")) {
+      throw new CustomException(ErrorCode.MEMBER_LOGIN_REQUIRED);
+    }
+    Member member = validateMember(request);
+    if (null == member) {
+      throw new CustomException(ErrorCode.LOGIN_WRONG_FORM_JWT_TOKEN);
+    }
 
     // Post 테이블에 유저 아이디로 작성한 게시글 가져오기.
-    List<Post> posts = postRepository.findAllByMemberId(userDetails.getMember().getId());
+    List<Post> posts = postRepository.findAllByMemberId(member.getId());
 
     // 만약 유저 아이디로 작성한 게시글이 없어 posts가 비어있다면 에러 처리.
     if(posts.isEmpty()){
@@ -158,6 +170,7 @@ public class PostService {
                       .author(post.getMember().getNickname())
                       .title(post.getTitle())
                       .content(post.getContent())
+                      .postCategory(post.getPostCategory())
                       .createdAt(post.getCreatedAt())
                       .modifiedAt(post.getModifiedAt())
                       .build()
@@ -236,7 +249,15 @@ public class PostService {
       throw new CustomException(ErrorCode.POST_NOT_FOUND);
     }
 
+    if (null == request.getHeader("Refresh-Token") || null == request.getHeader("Authorization")) {
+      throw new CustomException(ErrorCode.MEMBER_LOGIN_REQUIRED);
+    }
     Member member = validateMember(request);
+    if (null == member) {
+      throw new CustomException(ErrorCode.LOGIN_WRONG_FORM_JWT_TOKEN);
+    }
+
+
     if(likesRepository.findLikesByMemberAndPost(member, post).isPresent()){
       throw new CustomException(ErrorCode.ALREADY_PUT_LIKE);
 
@@ -248,11 +269,19 @@ public class PostService {
     likes.setMember(member);
     likesRepository.save(likes);
 
-    return ResponseDto.success("success");
+    return ResponseDto.success("좋아요를 하셨습니다.");
   }
 
-  public ResponseDto<?> getPostsLike(UserDetailsImpl userDetails) {
-    Member member = userDetails.getMember();
+  public ResponseDto<?> getPostsLike(HttpServletRequest request) {
+
+    if (null == request.getHeader("Refresh-Token") || null == request.getHeader("Authorization")) {
+      throw new CustomException(ErrorCode.MEMBER_LOGIN_REQUIRED);
+    }
+    Member member = validateMember(request);
+    if (null == member) {
+      throw new CustomException(ErrorCode.LOGIN_WRONG_FORM_JWT_TOKEN);
+    }
+
     List<Likes> likelist = likesRepository.findLikesByMember(member);
 
     if (likelist.isEmpty()) {
@@ -270,6 +299,7 @@ public class PostService {
                       .title(post.getTitle())
                       .content(post.getContent())
                       .author(post.getMember().getNickname())
+                      .postCategory(post.getPostCategory())
                       .createdAt(post.getCreatedAt())
                       .modifiedAt(post.getModifiedAt())
                       .build()

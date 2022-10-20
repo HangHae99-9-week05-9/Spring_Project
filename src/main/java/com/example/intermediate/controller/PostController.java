@@ -76,14 +76,14 @@ public class PostController {
 
     // 멤버가 작성한 글 조회
     @GetMapping(value = "/api/auth/members/posts")
-    public ResponseDto<?> getMembersPosts(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return postService.getUserPosts(userDetails);
+    public ResponseDto<?> userPosts(HttpServletRequest request) {
+      return postService.getUserPosts(request);
     }
 
     // 멤버가 좋아요한 글 조회
     @GetMapping(value = "/api/members/posts/likes")
-    public ResponseDto<?> getLikesPosts(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return postService.getPostsLike(userDetails);
+    public ResponseDto<?> getPostsLike(HttpServletRequest request) {
+      return postService.getPostsLike(request);
     }
 
 
