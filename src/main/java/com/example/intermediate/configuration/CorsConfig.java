@@ -18,6 +18,8 @@ public class CorsConfig {
         config.addAllowedOrigin("http://localhost:3000");//모든 ip의 응답을 허용하겠다.
         config.addAllowedHeader("*");//모든 header의 응답을 허용하겠다.
         config.addAllowedMethod("*");//모든 post,get,putmdelete,patch 요청울 허용하겠다.
+        config.addExposedHeader("*");
+        config.addAllowedHeader("*");
         source.registerCorsConfiguration("/api/**",config);
         return new CorsFilter(source);
     }
