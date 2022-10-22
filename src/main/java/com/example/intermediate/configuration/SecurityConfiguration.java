@@ -4,6 +4,8 @@ import com.example.intermediate.jwt.AccessDeniedHandlerException;
 import com.example.intermediate.jwt.AuthenticationEntryPointException;
 import com.example.intermediate.jwt.TokenProvider;
 import com.example.intermediate.service.UserDetailsServiceImpl;
+import com.example.intermediate.configuration.CorsConfig;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -69,6 +71,7 @@ public class SecurityConfiguration {
                       "/v3/api-docs/**",
                       "/swagger-ui/**").permitAll()
         .anyRequest().authenticated()
+        .addFilter(corsFilter)
 
         .and()
         .apply(new JwtSecurityConfiguration(SECRET_KEY, tokenProvider, userDetailsService));
