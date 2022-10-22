@@ -22,6 +22,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import javax.servlet.Filter;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -35,6 +37,7 @@ public class SecurityConfiguration {
   private final UserDetailsServiceImpl userDetailsService;
   private final AuthenticationEntryPointException authenticationEntryPointException;
   private final AccessDeniedHandlerException accessDeniedHandlerException;
+  private final CorsConfig corsConfig;
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -45,6 +48,7 @@ public class SecurityConfiguration {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http.cors();
+    http.addFilter(corsConfig.corsFilter());
 
     http.csrf().disable()
 
@@ -71,7 +75,6 @@ public class SecurityConfiguration {
                       "/v3/api-docs/**",
                       "/swagger-ui/**").permitAll()
         .anyRequest().authenticated()
-        .addFilter(corsFilter)
 
         .and()
         .apply(new JwtSecurityConfiguration(SECRET_KEY, tokenProvider, userDetailsService));
