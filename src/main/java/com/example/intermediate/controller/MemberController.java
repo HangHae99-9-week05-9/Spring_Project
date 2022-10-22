@@ -2,6 +2,7 @@ package com.example.intermediate.controller;
 
 import com.example.intermediate.controller.request.LoginRequestDto;
 import com.example.intermediate.controller.request.MemberRequestDto;
+import com.example.intermediate.controller.request.TokenDto;
 import com.example.intermediate.controller.response.ResponseDto;
 import com.example.intermediate.service.MemberService;
 
@@ -10,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -44,4 +46,5 @@ public class MemberController {
     public ResponseDto<?> logoutMembers(HttpServletRequest request) {
         return memberService.logout(request);
     }
+
 }

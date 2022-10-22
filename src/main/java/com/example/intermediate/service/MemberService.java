@@ -108,10 +108,11 @@ public class MemberService {
     return optionalMember.orElse(null);
   }
 
+
   public void tokenToHeaders(TokenDto tokenDto, HttpServletResponse response) {
-    response.addHeader("Authorization", "Bearer " + tokenDto.getAccessToken());
-    response.addHeader("Refresh-Token", tokenDto.getRefreshToken());
-    response.addHeader("Access-Token-Expire-Time", tokenDto.getAccessTokenExpiresIn().toString());
+    response.addHeader("Access_Token", "Bearer " + tokenDto.getAccessToken());
+    response.addHeader("Refresh_Token", tokenDto.getRefreshToken());
+    response.addHeader("Access_Token_Expire_Time", tokenDto.getAccessTokenExpiresIn().toString());
   }
 
 }
