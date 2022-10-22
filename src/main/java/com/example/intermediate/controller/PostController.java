@@ -30,6 +30,7 @@ public class PostController {
 
 
     // 게시글 작성
+    @CrossOrigin("*")
     @SwaggerAnnotation
     @PostMapping(value = "/api/auth/posts")
     public ResponseDto<?> createPosts(@RequestBody PostRequestDto requestDto,
@@ -39,6 +40,7 @@ public class PostController {
 
 
     // 게시글 좋아요
+    @CrossOrigin("*")
     @SwaggerAnnotation
     @PostMapping(value = "api/posts/{postid}/likes")
     public ResponseDto<?> likesPosts(@PathVariable Long postid, HttpServletRequest request) {
@@ -51,6 +53,7 @@ public class PostController {
     //**********************************************
 
     // 모든 게시물 조회
+    @CrossOrigin("*")
     @GetMapping(value = "/api/posts")
     // @Pagable을 통해 보여줄 페이시 위치(0이 시작), 한 페이지에 게시글 개수(15), 정렬 기준(createdAt), 정렬 기준의 순서(내림차순)을 정의
     public ResponseDto<?> getAllPosts(@PageableDefault(page = 0, size = 15, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -58,12 +61,14 @@ public class PostController {
     }
 
     // 게시물 상세조회
+    @CrossOrigin("*")
     @GetMapping(value = "/api/posts/{id}")
     public ResponseDto<?> getPosts(@PathVariable Long id) {
         return postService.getPost(id);
     }
 
     // 멤버가 작성한 글 조회
+    @CrossOrigin("*")
     @SwaggerAnnotation
     @GetMapping(value = "/api/auth/members/posts")
     public ResponseDto<?> userPosts(HttpServletRequest request) {
@@ -71,6 +76,7 @@ public class PostController {
     }
 
     // 멤버가 좋아요한 글 조회
+    @CrossOrigin("*")
     @SwaggerAnnotation
     @GetMapping(value = "/api/auth/members/posts/likes")
     public ResponseDto<?> getPostsLike(HttpServletRequest request) {
@@ -83,6 +89,7 @@ public class PostController {
     //**********************************************
 
     // 게시글 수정
+    @CrossOrigin("*")
     @SwaggerAnnotation
     @PutMapping(value = "/api/auth/posts/{id}")
     public ResponseDto<?> updatePosts(@PathVariable Long id, @RequestBody PostRequestDto postRequestDto,
@@ -96,6 +103,7 @@ public class PostController {
     //**********************************************
 
     //게시글 삭제
+    @CrossOrigin("*")
     @SwaggerAnnotation
     @DeleteMapping(value = "/api/auth/posts/{id}")
     public ResponseDto<?> deletePosts(@PathVariable Long id,

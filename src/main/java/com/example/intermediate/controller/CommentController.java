@@ -28,6 +28,7 @@ public class CommentController {
 
 
     // 게시글에 대한 댓글 작성
+    @CrossOrigin("*")
     @SwaggerAnnotation
     @PostMapping(value = "/api/auth/{postId}/comments")
     public ResponseDto<?> createComments(@PathVariable Long postId,
@@ -42,6 +43,7 @@ public class CommentController {
     //**********************************************
 
     // 게시글에 대한 모든 댓글 조회
+    @CrossOrigin("*")
     @GetMapping(value = "/api/comments/{id}")
     // 정렬 기준이 여러 개일 시 @PageableDefault만으로 안되고 @SortDefault를 사용하여 정렬해아 한다.
     public ResponseDto<?> getAllComments(@PathVariable Long id,
@@ -56,6 +58,7 @@ public class CommentController {
 
 
     // 멤버가 작성한 댓글 조회
+    @CrossOrigin("*")
     @SwaggerAnnotation
     @GetMapping(value = "/api/auth/comments")
     public ResponseDto<?> getUserComments(HttpServletRequest request) {
@@ -68,6 +71,7 @@ public class CommentController {
     //**********************************************
 
     // 댓글 수정
+    @CrossOrigin("*")
     @SwaggerAnnotation
     @PutMapping(value = "/api/auth/comments/{id}")
     public ResponseDto<?> updateComments(@PathVariable Long id, @RequestBody CommentRequestDto requestDto,
@@ -81,6 +85,7 @@ public class CommentController {
     //**********************************************
 
     // 댓글 삭제
+    @CrossOrigin("*")
     @SwaggerAnnotation
     @DeleteMapping(value = "/api/auth/comments/{id}")
     public ResponseDto<?> deleteComments(@PathVariable Long id,
