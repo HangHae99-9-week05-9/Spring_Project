@@ -48,7 +48,6 @@ public class SecurityConfiguration {
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http.cors();
-    http.addFilter(corsConfig.corsFilter());
 
     http.csrf().disable()
 
@@ -77,6 +76,7 @@ public class SecurityConfiguration {
         .anyRequest().authenticated()
 
         .and()
+            .addFilter(corsConfig.corsFilter())
         .apply(new JwtSecurityConfiguration(SECRET_KEY, tokenProvider, userDetailsService));
 
     return http.build();
