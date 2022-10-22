@@ -31,6 +31,7 @@ public class MemberController {
 
 
     // 멤버 로그인
+    @CrossOrigin("*")
     @PostMapping(value = "/api/members/login")
     public ResponseDto<?> loginMembers(@RequestBody @Valid LoginRequestDto requestDto,
                                        HttpServletResponse response
