@@ -37,7 +37,7 @@ public class PostService {
 
   @Transactional
   public ResponseDto<?> createPost(PostRequestDto requestDto, HttpServletRequest request) {
-    if (null == request.getHeader("Refresh-Token") || null == request.getHeader("Authorization")) {
+    if (null == request.getHeader("Refresh_Token") || null == request.getHeader("Authorization")) {
       throw new CustomException(ErrorCode.MEMBER_LOGIN_REQUIRED);
     }
     Member member = validateMember(request);
@@ -145,7 +145,7 @@ public class PostService {
   @Transactional(readOnly = true)
   public ResponseDto<?> getUserPosts(HttpServletRequest request) {
 
-    if (null == request.getHeader("Refresh-Token") || null == request.getHeader("Authorization")) {
+    if (null == request.getHeader("Refresh_Token") || null == request.getHeader("Authorization")) {
       throw new CustomException(ErrorCode.MEMBER_LOGIN_REQUIRED);
     }
     Member member = validateMember(request);
@@ -187,7 +187,7 @@ public class PostService {
 
   @Transactional
   public ResponseDto<Post> updatePost(Long id, PostRequestDto requestDto, HttpServletRequest request) {
-    if (null == request.getHeader("Refresh-Token") || null == request.getHeader("Authorization")) {
+    if (null == request.getHeader("Refresh_Token") || null == request.getHeader("Authorization")) {
       throw new CustomException(ErrorCode.MEMBER_LOGIN_REQUIRED);
     }
     Member member = validateMember(request);
@@ -211,7 +211,7 @@ public class PostService {
 
   @Transactional
   public ResponseDto<?> deletePost(Long id, HttpServletRequest request) {
-    if (null == request.getHeader("Refresh-Token") || null == request.getHeader("Authorization")) {
+    if (null == request.getHeader("Refresh_Token") || null == request.getHeader("Authorization")) {
       throw new CustomException(ErrorCode.MEMBER_LOGIN_REQUIRED);
     }
     Member member = validateMember(request);
@@ -240,7 +240,7 @@ public class PostService {
 
   @Transactional
   public Member validateMember(HttpServletRequest request) {
-    if (!tokenProvider.validateToken(request.getHeader("Refresh-Token"))) {
+    if (!tokenProvider.validateToken(request.getHeader("Refresh_Token"))) {
       return null;
     }
     return tokenProvider.getMemberFromAuthentication();
@@ -254,7 +254,7 @@ public class PostService {
       throw new CustomException(ErrorCode.POST_NOT_FOUND);
     }
 
-    if (null == request.getHeader("Refresh-Token") || null == request.getHeader("Authorization")) {
+    if (null == request.getHeader("Refresh_Token") || null == request.getHeader("Authorization")) {
       throw new CustomException(ErrorCode.MEMBER_LOGIN_REQUIRED);
     }
     Member member = validateMember(request);
@@ -279,7 +279,7 @@ public class PostService {
 
   public ResponseDto<?> getPostsLike(HttpServletRequest request) {
 
-    if (null == request.getHeader("Refresh-Token") || null == request.getHeader("Authorization")) {
+    if (null == request.getHeader("Refresh_Token") || null == request.getHeader("Authorization")) {
       throw new CustomException(ErrorCode.MEMBER_LOGIN_REQUIRED);
     }
     Member member = validateMember(request);

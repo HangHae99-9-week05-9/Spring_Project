@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @ApiImplicitParams({
         @ApiImplicitParam(
-                name = "Refresh-Token",
+                name = "Refresh_Token",
                 required = true,
                 dataType = "string",
                 paramType = "header"

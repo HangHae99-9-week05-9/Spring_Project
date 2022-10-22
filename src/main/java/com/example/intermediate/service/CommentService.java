@@ -34,7 +34,7 @@ public class CommentService {
 
   @Transactional
   public ResponseDto<?> createComment(Long postId, CommentRequestDto requestDto, HttpServletRequest request) {
-    if (null == request.getHeader("Refresh-Token") || null == request.getHeader("Authorization")) {
+    if (null == request.getHeader("Refresh_Token") || null == request.getHeader("Authorization")) {
       throw new CustomException(ErrorCode.MEMBER_LOGIN_REQUIRED);
     }
 
@@ -88,7 +88,7 @@ public class CommentService {
 
   @Transactional(readOnly = true)
   public ResponseDto<?> getAllComments(HttpServletRequest request) {
-    if (null == request.getHeader("Refresh-Token") || null == request.getHeader("Authorization")) {
+    if (null == request.getHeader("Refresh_Token") || null == request.getHeader("Authorization")) {
       throw new CustomException(ErrorCode.MEMBER_LOGIN_REQUIRED);
     }
 
@@ -126,7 +126,7 @@ public class CommentService {
 
   @Transactional
   public ResponseDto<?> updateComment( Long id, CommentRequestDto requestDto, HttpServletRequest request) {
-    if (null == request.getHeader("Refresh-Token") || null == request.getHeader("Authorization")) {
+    if (null == request.getHeader("Refresh_Token") || null == request.getHeader("Authorization")) {
       throw new CustomException(ErrorCode.MEMBER_LOGIN_REQUIRED);
     }
     Member member = validateMember(request);
@@ -158,7 +158,7 @@ public class CommentService {
 
   @Transactional
   public ResponseDto<?> deleteComment( Long id, HttpServletRequest request) {
-    if (null == request.getHeader("Refresh-Token") || null == request.getHeader("Authorization")) {
+    if (null == request.getHeader("Refresh_Token") || null == request.getHeader("Authorization")) {
       throw new CustomException(ErrorCode.MEMBER_LOGIN_REQUIRED);
     }
     Member member = validateMember(request);
@@ -188,7 +188,7 @@ public class CommentService {
 
   @Transactional
   public Member validateMember(HttpServletRequest request) {
-    if (!tokenProvider.validateToken(request.getHeader("Refresh-Token"))) {
+    if (!tokenProvider.validateToken(request.getHeader("Refresh_Token"))) {
       return null;
     }
     return tokenProvider.getMemberFromAuthentication();

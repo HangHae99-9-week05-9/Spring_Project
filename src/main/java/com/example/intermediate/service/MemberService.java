@@ -86,7 +86,7 @@ public class MemberService {
 
 
   public ResponseDto<?> logout(HttpServletRequest request) {
-    if (!tokenProvider.validateToken(request.getHeader("Refresh-Token"))) {
+    if (!tokenProvider.validateToken(request.getHeader("Refresh_Token"))) {
       throw new CustomException(ErrorCode.LOGIN_WRONG_FORM_JWT_TOKEN);
     }
     Member member = tokenProvider.getMemberFromAuthentication();
@@ -110,7 +110,7 @@ public class MemberService {
 
 
   public void tokenToHeaders(TokenDto tokenDto, HttpServletResponse response) {
-    response.addHeader("Access_Token", "Bearer " + tokenDto.getAccessToken());
+    response.addHeader("Authorization", "Bearer " + tokenDto.getAccessToken());
     response.addHeader("Refresh_Token", tokenDto.getRefreshToken());
     response.addHeader("Access_Token_Expire_Time", tokenDto.getAccessTokenExpiresIn().toString());
   }
