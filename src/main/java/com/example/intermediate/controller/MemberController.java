@@ -24,7 +24,6 @@ public class MemberController {
     //**********************************************
 
     // 멤버 가입
-    @CrossOrigin("*")
     @PostMapping(value = "/api/members/signup")
     public ResponseDto<?> signupMembers(@RequestBody @Valid MemberRequestDto requestDto) {
         return memberService.createMember(requestDto);
@@ -32,7 +31,6 @@ public class MemberController {
 
 
     // 멤버 로그인
-    @CrossOrigin("*")
     @PostMapping(value = "/api/members/login")
     public ResponseDto<?> loginMembers(@RequestBody @Valid LoginRequestDto requestDto,
                                        HttpServletResponse response
@@ -42,7 +40,6 @@ public class MemberController {
 
 
     // 멤버 로그아웃
-    @CrossOrigin("*")
     @PostMapping(value = "/api/auth/members/logout")
     public ResponseDto<?> logoutMembers(HttpServletRequest request) {
         return memberService.logout(request);
