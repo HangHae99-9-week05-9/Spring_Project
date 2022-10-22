@@ -47,7 +47,6 @@ public class SecurityConfiguration {
   @Bean
   @Order(SecurityProperties.BASIC_AUTH_ORDER)
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http.cors();
 
     http.csrf().disable()
 
